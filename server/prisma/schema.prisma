@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model User {
@@ -33,30 +33,30 @@ enum ContentType {
 }
 
 model Movie {
-  id             String      @id @default(uuid())
-  title          String
-  description    String      @db.Text
-  genre          String
-  contentType    ContentType @default(MOVIE)
-  releaseYear    Int
-  duration       Int
-  language       String
-  rating         Float
-  thumbnailUrl   String      @db.Text
-  bannerUrl      String      @db.Text
-  trailerUrl     String?     @db.Text
-  videoUrl       String      @db.Text
-  cast           String
-  director       String
-  studio         String?
-  totalSeasons   Int?
-  totalEpisodes  Int?
-  status         String?
-  featured       Boolean     @default(false)
-  trending       Boolean     @default(false)
-  showOnBanner   Boolean     @default(false)
-  bannerOrder    Int         @default(0)
-  createdAt      DateTime    @default(now())
+  id            String      @id @default(uuid())
+  title         String
+  description   String      @db.Text
+  genre         String
+  contentType   ContentType @default(MOVIE)
+  releaseYear   Int
+  duration      Int
+  language      String
+  rating        Float
+  thumbnailUrl  String      @db.Text
+  bannerUrl     String      @db.Text
+  trailerUrl    String?     @db.Text
+  videoUrl      String      @db.Text
+  cast          String
+  director      String
+  studio        String?
+  totalSeasons  Int?
+  totalEpisodes Int?
+  status        String?
+  featured      Boolean     @default(false)
+  trending      Boolean     @default(false)
+  showOnBanner  Boolean     @default(false)
+  bannerOrder   Int         @default(0)
+  createdAt     DateTime    @default(now())
 
   watchlists   Watchlist[]
   watchHistory WatchHistory[]
@@ -68,8 +68,8 @@ model Watchlist {
   movieId   String
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
   @@unique([userId, movieId])
 }
@@ -81,9 +81,8 @@ model WatchHistory {
   progress      Int
   lastWatchedAt DateTime @default(now())
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  movie         Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
   @@unique([userId, movieId])
 }
-

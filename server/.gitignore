@@ -3,3 +3,10 @@ node_modules
 .env
 
 /src/generated/prisma
+
+.env
+
+scratch/data_backup.json
+scratch/backup.ts
+scratch/restore.ts
+scratch/restore.js
