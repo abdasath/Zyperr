@@ -10,11 +10,23 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "types": ["node"],
+    "ignoreDeprecations": "6.0",
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "scratch/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "prisma/**/*",
+    "scratch/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
