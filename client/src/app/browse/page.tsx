@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { moviesApi } from "@/lib/api";
 import MovieCard from "@/components/MovieCard";
@@ -51,13 +51,28 @@ function BrowseContent() {
   const [genres,     setGenres]     = useState<string[]>([]);
   const [loading,    setLoading]    = useState(true);
 
+  // Debounce: auto-search 400ms after user stops typing
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearchQuery(searchInput.trim());
+      if (searchInput.trim()) setActiveViewAll("");
+    }, 400);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput]);
+
   const fetchContent = useCallback(async () => {
     try {
       setLoading(true);
       const params: Record<string, any> = { limit: 200 };
       if (activeType !== "ALL") params.contentType = activeType;
       if (activeGenre)          params.genre        = activeGenre;
-      if (searchQuery)          params.search       = searchQuery;
+      // Remove server-side search to enforce robust client-side case-insensitive filtering
+      // if (searchQuery)       params.search       = searchQuery;
 
       const [contentRes, featuredRes, bannerRes, trendingRes, genresRes] = await Promise.all([
         moviesApi.getAll(params),
@@ -106,6 +121,8 @@ function BrowseContent() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    // Immediately commit on form submit (bypasses debounce)
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setSearchQuery(searchInput.trim());
     setActiveGenre("");
     setActiveViewAll("");
@@ -138,9 +155,15 @@ function BrowseContent() {
     setActiveViewAll("");
   };
 
-  const movies            = allContent.filter((c) => c.contentType === "MOVIE" || !c.contentType);
-  const series            = allContent.filter((c) => c.contentType === "WEB_SERIES");
-  const anime             = allContent.filter((c) => c.contentType === "ANIME");
+  let filteredContent = allContent;
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filteredContent = filteredContent.filter(c => c.title.toLowerCase().includes(query));
+  }
+
+  const movies            = filteredContent.filter((c) => c.contentType === "MOVIE" || !c.contentType);
+  const series            = filteredContent.filter((c) => c.contentType === "WEB_SERIES");
+  const anime             = filteredContent.filter((c) => c.contentType === "ANIME");
   const trendingFiltered  = trending.filter((c) =>
     activeType === "ALL" || c.contentType === activeType || (!c.contentType && activeType === "MOVIE")
   );
@@ -152,8 +175,8 @@ function BrowseContent() {
   // If activeType is set to a specific category, force it into a grid view like a filtered page.
   const isCategoryPage = activeType !== "ALL" && !activeViewAll;
 
-  let gridContent = allContent;
-  let gridTitle = `${allContent.length} ${allContent.length === 1 ? "result" : "results"}`;
+  let gridContent = filteredContent;
+  let gridTitle = `${filteredContent.length} ${filteredContent.length === 1 ? "result" : "results"}`;
 
   if (activeViewAll === "trending") {
     gridContent = trendingFiltered;
@@ -194,7 +217,7 @@ function BrowseContent() {
       <Navbar />
 
       {/* ── Hero Banner ── */}
-      {showHero && <HeroBanner movies={bannerMovies} />}
+      {showHero ? <HeroBanner movies={bannerMovies} /> : <div style={{ height: 70 }} />}
 
       {/* ══════════════════════════════════════════════════
           STICKY FILTER BAR  (type tabs + search)
@@ -211,18 +234,20 @@ function BrowseContent() {
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}
       >
-        <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 48px" }}>
+        <div className="browse-container" style={{ maxWidth: 1400, margin: "0 auto", padding: "0 48px" }}>
           {/* Row 1: type tabs + search */}
-          <div style={{
+          <div className="browse-filter-row" style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 16,
-            height: 58,
+            gap: 12,
+            flexWrap: "wrap",
+            padding: "10px 0",
+            minHeight: 58,
           }}>
 
             {/* Content-type tabs */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <div className="browse-tabs" style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
               {CONTENT_TABS.map((tab) => {
                 const isActive = activeType === tab.key;
                 return (
@@ -254,16 +279,28 @@ function BrowseContent() {
             {/* Search form */}
             <form
               onSubmit={handleSearch}
+              className="browse-search-form"
               style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}
             >
               <div style={{ position: "relative" }}>
-                <Search
-                  size={14}
-                  style={{
-                    position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-                    color: "rgba(255,255,255,0.3)", pointerEvents: "none",
-                  }}
-                />
+                {/* Show spinner while debouncing, search icon otherwise */}
+                {loading && searchInput ? (
+                  <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
+                    <div style={{
+                      width: 14, height: 14, borderRadius: "50%",
+                      border: "2px solid rgba(229,9,20,0.3)", borderTopColor: "#e50914",
+                      animation: "spin 0.7s linear infinite"
+                    }} />
+                  </div>
+                ) : (
+                  <Search
+                    size={14}
+                    style={{
+                      position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+                      color: searchInput ? "rgba(229,9,20,0.7)" : "rgba(255,255,255,0.3)", pointerEvents: "none",
+                    }}
+                  />
+                )}
                 <input
                   id="browse-search"
                   type="text"
@@ -271,7 +308,7 @@ function BrowseContent() {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   style={{
-                    width: 260, height: 38,
+                    width: "clamp(140px, 20vw, 260px)", height: 38,
                     paddingLeft: 34, paddingRight: searchInput ? 34 : 14,
                     background: "rgba(255,255,255,0.06)",
                     border: "1px solid rgba(255,255,255,0.1)",
@@ -372,7 +409,7 @@ function BrowseContent() {
       {/* ══════════════════════════════════════════════════
           MAIN CONTENT
       ══════════════════════════════════════════════════ */}
-      <div style={{ maxWidth: 1400, margin: "0 auto", paddingBottom: "20px" }}>
+      <div className="browse-container" style={{ maxWidth: 1400, margin: "0 auto", paddingBottom: "20px", paddingTop: "24px" }}>
         {loading ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 120 }}>
             <div style={{
@@ -411,7 +448,7 @@ function BrowseContent() {
                   </button>
                 </div>
               ) : (
-                <div style={{ padding: "0 48px" }}>
+                <div className="browse-container" style={{ padding: "0 48px" }}>
                   {/* View All Header */}
                   {activeViewAll && (
                     <div style={{ marginBottom: 40, marginTop: 100 }}>

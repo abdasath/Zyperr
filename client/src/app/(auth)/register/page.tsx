@@ -91,7 +91,7 @@ export default function RegisterPage() {
         }}
       />
 
-      <div className="relative z-10 w-full my-auto" style={{ maxWidth: "460px" }}>
+      <div className="auth-page-wrapper relative z-10 w-full my-auto" style={{ maxWidth: "460px" }}>
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -110,7 +110,7 @@ export default function RegisterPage() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="glass-card-strong"
+          className="glass-card-strong auth-card"
           style={{ padding: "40px 48px 36px", marginBottom: "60px" }}
           id="register-card"
         >

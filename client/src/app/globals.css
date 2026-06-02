@@ -321,12 +321,6 @@ h1, h2, h3, h4, h5, h6 {
   -ms-overflow-style: none;
 }
 
-@media (max-width: 768px) {
-  .scroll-row {
-    padding: 8px 40px 16px;
-  }
-}
-
 .scroll-row::-webkit-scrollbar {
   display: none;
 }
@@ -385,7 +379,7 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
   width: 100%;
   height: 100vh;
-  min-height: 640px;
+  min-height: 680px;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
@@ -413,6 +407,10 @@ h1, h2, h3, h4, h5, h6 {
       transparent 20%
     );
   z-index: 1;
+}
+
+.hero-content-area {
+  padding-bottom: 80px !important;
 }
 
 /* ============================================
@@ -499,15 +497,6 @@ h1, h2, h3, h4, h5, h6 {
   gap: 20px;
 }
 
-@media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  .navbar {
-    padding: 0 20px;
-  }
-}
-
 /* ============================================
    PAGE LAYOUT
    ============================================ */
@@ -518,15 +507,8 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 80px;
 }
 
-@media (max-width: 768px) {
-  .page-container {
-    padding: 0 40px;
-  }
-}
-
 /* ============================================
    ANIMATIONS
-
    ============================================ */
 
 @keyframes spin {
@@ -590,3 +572,483 @@ h1, h2, h3, h4, h5, h6 {
 /* hide-scrollbar utility */
 .hide-scrollbar { scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ============================================
+   AUTH CARDS
+   ============================================ */
+
+.auth-card {
+  width: 100%;
+}
+
+/* ============================================
+   ADMIN STAT GRID
+   ============================================ */
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ============================================
+   BROWSE / WATCHLIST GRID
+   ============================================ */
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 20px;
+}
+
+/* ============================================
+   RESPONSIVE — TABLET (768px – 1023px)
+   ============================================ */
+
+@media (max-width: 1023px) {
+
+  .page-container {
+    padding: 0 40px;
+  }
+
+  .navbar {
+    padding: 0 32px;
+  }
+
+  .scroll-row {
+    padding: 8px 40px 16px;
+  }
+
+  .hero-section {
+    height: 85vh;
+    min-height: 500px;
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 5vw, 70px) !important;
+  }
+
+  .browse-container {
+    padding: 0 32px !important;
+  }
+
+  .hero-content-area {
+    padding-bottom: 60px !important;
+  }
+
+  .hero-arrow {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* MovieRow responsive padding */
+  .movie-row-header {
+    padding: 0 32px !important;
+  }
+
+  .movie-row-scroll {
+    padding: 16px 32px 20px !important;
+  }
+
+  /* Auth card */
+  .auth-card {
+    padding: 36px 36px 32px !important;
+  }
+
+  /* Admin stats */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Content grid */
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+}
+
+/* ============================================
+   RESPONSIVE — LARGE PHONES (481px – 767px)
+   ============================================ */
+
+@media (max-width: 767px) {
+  .page-container {
+    padding: 0 20px;
+  }
+
+  .browse-container {
+    padding: 0 20px !important;
+  }
+
+  .hero-title {
+    font-size: clamp(28px, 7vw, 42px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+
+  .navbar {
+    padding: 0 16px;
+    height: 60px;
+  }
+
+  .scroll-row {
+    padding: 6px 16px 12px;
+    gap: 10px;
+  }
+
+  .hero-section {
+    height: 85vh;
+    min-height: 520px;
+  }
+
+  .hero-content-area {
+    padding-bottom: 56px !important;
+  }
+
+  .hero-mute {
+    display: none !important;
+  }
+
+  /* Hide dots on mobile, show arrows instead */
+  .hero-dots {
+    display: none !important;
+  }
+
+  .hero-arrow {
+    display: flex !important;
+    width: 34px !important;
+    height: 34px !important;
+    opacity: 0.85;
+  }
+
+  .hero-title-row {
+    align-items: center !important;
+  }
+
+  .hero-title-accent {
+    min-height: 36px !important;
+    margin-top: 0 !important;
+  }
+
+  .hero-badges-row {
+    margin-bottom: 24px !important;
+  }
+
+  .browse-filter-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 14px 0 !important;
+  }
+
+  .browse-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: hidden !important;
+    width: 100%;
+    justify-content: space-between !important;
+    gap: 4px !important;
+  }
+
+  .browse-tabs button {
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+    gap: 4px !important;
+    flex: 1; /* distributes width evenly */
+    justify-content: center;
+  }
+
+  .browse-search-form {
+    width: 100% !important;
+  }
+
+  .browse-search-form input {
+    width: 100% !important;
+  }
+
+  .hero-inner {
+    max-width: 100% !important;
+  }
+
+  .hero-cta-row {
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding-left: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .hero-cta-row .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 13px !important;
+    padding: 10px 14px !important;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .hero-arrow {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .hero-gradient-overlay {
+    background:
+      linear-gradient(
+        to right,
+        rgba(6, 6, 6, 0.97) 0%,
+        rgba(6, 6, 6, 0.80) 60%,
+        rgba(6, 6, 6, 0.60) 100%
+      ),
+      linear-gradient(
+        to top,
+        rgba(6, 6, 6, 1) 0%,
+        rgba(6, 6, 6, 0.7) 30%,
+        rgba(6, 6, 6, 0) 60%
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(6, 6, 6, 0.7) 0%,
+        transparent 20%
+      );
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .glass-card-strong {
+    border-radius: 16px;
+  }
+
+  /* Admin table horizontal scroll on mobile */
+  .admin-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* MovieRow responsive padding */
+  .movie-row-header {
+    padding: 0 20px !important;
+    padding-top: 24px !important;
+  }
+
+  .movie-row-scroll {
+    padding: 12px 20px 16px !important;
+  }
+
+  /* MovieRow section title */
+  .movie-row-title {
+    font-size: 22px !important;
+  }
+
+  /* Hide scroll arrows on mobile - use swipe instead */
+  .movie-row-arrows {
+    display: none !important;
+  }
+
+  /* Auth card full width on mobile */
+  .auth-card {
+    padding: 28px 24px 24px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Constrain auth page card width on mobile */
+  .auth-page-wrapper {
+    max-width: 420px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Profile Page Mobile Overrides */
+  .profile-page-wrapper {
+    padding-top: 100px !important;
+    padding-bottom: 80px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .profile-card {
+    padding: 24px !important;
+    gap: 24px !important;
+  }
+  .profile-identity-row {
+    gap: 16px !important;
+  }
+  .profile-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 32px !important;
+  }
+  .profile-actions button {
+    padding: 12px 20px !important;
+    font-size: 13px !important;
+  }
+  .profile-divider {
+    margin-top: 32px !important;
+    margin-bottom: 32px !important;
+  }
+  .profile-details-grid {
+    gap: 16px !important;
+  }
+  .profile-detail-card {
+    padding: 20px !important;
+    gap: 12px !important;
+  }
+
+  /* Admin stats 2-col on large phones */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Content grid 3 columns on large phones */
+  .content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* ============================================
+   RESPONSIVE — SMALL PHONES (≤ 480px)
+   ============================================ */
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 0 14px;
+  }
+
+  .browse-container {
+    padding: 0 14px !important;
+  }
+
+  .navbar {
+    padding: 0 14px;
+    height: 58px;
+  }
+
+  .scroll-row {
+    padding: 4px 14px 10px;
+    gap: 8px;
+  }
+
+  .hero-section {
+    height: 85vh;
+    min-height: 460px;
+  }
+
+  .hero-title {
+    font-size: 28px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+  }
+
+  .hero-content-area {
+    padding-bottom: 48px !important;
+  }
+
+  .hero-cta-row {
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    padding-left: 14px;
+    overflow-x: auto;
+  }
+
+  .hero-cta-row .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px !important;
+    padding: 9px 12px !important;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  /* Hide dots, show arrows on small phones too */
+  .hero-dots {
+    display: none !important;
+  }
+
+  .hero-arrow {
+    display: flex !important;
+    width: 32px !important;
+    height: 32px !important;
+    opacity: 0.8;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 11px 20px;
+    font-size: 14px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  /* MovieRow responsive padding */
+  .movie-row-header {
+    padding: 0 14px !important;
+    padding-top: 20px !important;
+  }
+
+  .movie-row-scroll {
+    padding: 10px 14px 14px !important;
+  }
+
+  .movie-row-title {
+    font-size: 18px !important;
+  }
+
+  .movie-row-arrows {
+    display: none !important;
+  }
+
+  /* Auth card compact */
+  .auth-card {
+    padding: 22px 18px 20px !important;
+  }
+
+  .auth-page-wrapper {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Admin stats 1-col on tiny screens */
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  /* Content grid 2 columns */
+  .content-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}

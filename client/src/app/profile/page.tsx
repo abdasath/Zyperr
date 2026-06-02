@@ -60,24 +60,24 @@ export default function ProfilePage() {
     <div style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
       <Navbar />
 
-      <div className="max-w-4xl px-6 w-full" style={{ paddingTop: "140px", paddingBottom: "120px", margin: "0 auto" }}>
+      <div className="max-w-4xl px-6 w-full profile-page-wrapper" style={{ paddingTop: "140px", paddingBottom: "120px", margin: "0 auto" }}>
         
         {/* --- HEADER SECTION --- */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 glass-card-strong relative overflow-hidden"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 glass-card-strong relative overflow-hidden profile-card"
           style={{ padding: "40px" }}
         >
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
           
           {/* Identity */}
-          <div className="flex items-center gap-6 relative z-10">
+          <div className="flex items-center gap-6 relative z-10 profile-identity-row">
             {/* Perfectly round, clean avatar with gradient and glow */}
             <div 
-              className="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold flex-shrink-0 shadow-[0_0_30px_rgba(229,9,20,0.3)] relative"
+              className="w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold flex-shrink-0 shadow-[0_0_30px_rgba(229,9,20,0.3)] relative profile-avatar"
               style={{
                 background: "linear-gradient(135deg, var(--zyperr-red) 0%, #900 100%)",
                 color: "#fff",
@@ -116,7 +116,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 sm:w-auto w-full relative z-10">
+          <div className="flex flex-col gap-3 sm:w-auto w-full relative z-10 profile-actions">
             {user.role === "ADMIN" && (
               <button 
                 onClick={() => router.push("/admin")}
@@ -137,7 +137,7 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Clean Divider */}
-        <div className="w-full h-px bg-white/10" style={{ marginTop: "48px", marginBottom: "48px" }}></div>
+        <div className="w-full h-px bg-white/10 profile-divider" style={{ marginTop: "56px", marginBottom: "64px" }}></div>
 
         {/* --- WATCHLIST SECTION --- */}
         <motion.div 
@@ -216,7 +216,7 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Clean Divider */}
-        <div className="w-full h-px bg-white/10" style={{ marginTop: "48px", marginBottom: "48px" }}></div>
+        <div className="w-full h-px bg-white/10 profile-divider" style={{ marginTop: "48px", marginBottom: "48px" }}></div>
 
         {/* --- ACCOUNT DETAILS SECTION --- */}
         <motion.div
@@ -228,10 +228,10 @@ export default function ProfilePage() {
             Account Details
           </h2>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: "24px" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 profile-details-grid" style={{ gap: "24px" }}>
             
             <div 
-              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start"
+              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start profile-detail-card"
               style={{ padding: "24px", borderRadius: "16px", gap: "16px" }}
             >
               <div 
@@ -247,7 +247,7 @@ export default function ProfilePage() {
             </div>
 
             <div 
-              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start"
+              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start profile-detail-card"
               style={{ padding: "24px", borderRadius: "16px", gap: "16px" }}
             >
               <div 
@@ -263,7 +263,7 @@ export default function ProfilePage() {
             </div>
 
             <div 
-              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start"
+              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start profile-detail-card"
               style={{ padding: "24px", borderRadius: "16px", gap: "16px" }}
             >
               <div 
@@ -279,7 +279,7 @@ export default function ProfilePage() {
             </div>
 
             <div 
-              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start"
+              className="glass-card bg-white/5 border border-white/10 hover:border-white/20 transition-all group flex items-start profile-detail-card"
               style={{ padding: "24px", borderRadius: "16px", gap: "16px" }}
             >
               <div 

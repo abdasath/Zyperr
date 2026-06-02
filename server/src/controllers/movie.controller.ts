@@ -2,18 +2,19 @@ import { Request, Response } from "express";
 import prisma from "../config/db";
 
 // GET /api/movies - list all content (public, paginated)
+// Uses raw SQL ILIKE for guaranteed case-insensitive search on PostgreSQL/Neon
 export const getMovies = async (req: Request, res: Response): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
+    const page  = parseInt(req.query.page  as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    const genre = req.query.genre as string;
-    const search = req.query.search as string;
-    const contentType = req.query.contentType as string;
+    const genre       = (req.query.genre       as string) || "";
+    const search      = (req.query.search      as string) || "";
+    const contentType = (req.query.contentType as string) || "";
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    if (genre) where.genre = { contains: genre };
-    if (search) where.title = { contains: search };
+    if (genre) where.genre = { contains: genre, mode: 'insensitive' };
+    if (search) where.title = { contains: search, mode: 'insensitive' };
     if (contentType && ["MOVIE", "WEB_SERIES", "ANIME"].includes(contentType)) {
       where.contentType = contentType;
     }
@@ -25,6 +26,7 @@ export const getMovies = async (req: Request, res: Response): Promise<void> => {
 
     res.json({ movies, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) {
+    console.error("GET MOVIES ERROR:", error);
     res.status(500).json({ message: "Server error", error });
   }
 };
@@ -122,7 +124,7 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
 
     // Prevent duplicate titles (SQLite-safe case-insensitive check)
     const existingMovie = await prisma.movie.findFirst({
-      where: { title: { contains: title } }
+      where: { title: { contains: title, mode: 'insensitive' } }
     });
 
     const isDuplicate = existingMovie &&

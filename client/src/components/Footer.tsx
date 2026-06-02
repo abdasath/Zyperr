@@ -10,7 +10,7 @@ export default function Footer() {
         background: "linear-gradient(to bottom, rgba(6,6,6,0.3) 0%, rgba(0,0,0,1) 100%)",
         marginTop: "40px",
         paddingTop: "40px",
-        paddingBottom: "40px"
+        paddingBottom: "16px"
       }}
     >
       <div className="page-container flex flex-col md:flex-row items-center justify-between gap-6">

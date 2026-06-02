@@ -64,6 +64,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
     >
       {/* ── Section header ── */}
       <div
+        className="movie-row-header"
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           marginBottom: 6, padding: "0 48px", paddingTop: 32,
@@ -94,7 +95,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
             </span>
           )}
 
-          <h2 style={{
+          <h2 className="movie-row-title" style={{
             fontFamily: "var(--font-display)",
             fontSize: 30,
             fontWeight: 800,
@@ -126,7 +127,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
           )}
 
           {/* Scroll buttons */}
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="movie-row-arrows" style={{ display: "flex", gap: 6 }}>
             {(["left", "right"] as const).map((dir) => (
               <button
                 key={dir}
@@ -162,6 +163,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
       <div style={{ position: "relative" }}>
         <div
           ref={rowRef}
+          className="movie-row-scroll"
           style={{
             display: "flex",
             gap: 14,

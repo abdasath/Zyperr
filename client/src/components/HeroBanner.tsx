@@ -99,15 +99,28 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
           className="absolute inset-0"
         >
           {!imgError ? (
-            <Image
-              src={currentMovie.bannerUrl}
-              alt={currentMovie.title}
-              fill
-              className="object-cover object-center"
-              priority
-              onError={() => setImgError(true)}
-              unoptimized
-            />
+            <>
+              {/* Desktop: wide landscape banner */}
+              <Image
+                src={currentMovie.bannerUrl}
+                alt={currentMovie.title}
+                fill
+                className="object-cover object-center hidden md:block"
+                priority
+                onError={() => setImgError(true)}
+                unoptimized
+              />
+              {/* Mobile: vertical portrait poster */}
+              <Image
+                src={currentMovie.thumbnailUrl}
+                alt={currentMovie.title}
+                fill
+                className="object-cover object-top block md:hidden"
+                priority
+                onError={() => setImgError(true)}
+                unoptimized
+              />
+            </>
           ) : (
             <div
               className="w-full h-full"
@@ -123,7 +136,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
       <div className="hero-gradient-overlay" />
 
       {/* Content */}
-      <div className="relative z-10 page-container w-full" style={{ paddingBottom: "80px" }}>
+      <div className="relative z-10 page-container w-full hero-content-area">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentMovie.id}
@@ -131,10 +144,10 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
-            className="max-w-2xl"
+            className="hero-inner max-w-2xl"
           >
             {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="hero-badges-row flex flex-wrap gap-2 mb-5">
               {currentMovie.featured && (
                 <span className="badge badge-red" style={{ fontSize: 11, display: "inline-flex", alignItems: "center", gap: 4 }}>
                   <Star size={9} fill="currentColor" /> Featured
@@ -153,8 +166,9 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
             </div>
 
             {/* Title with left accent */}
-            <div className="flex items-start gap-4 mb-8">
+            <div className="hero-title-row flex items-start gap-4 mb-8">
               <div
+                className="hero-title-accent"
                 style={{
                   width: 5,
                   minHeight: 60,
@@ -166,7 +180,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
                 }}
               />
               <h1
-                className="font-black"
+                className="font-black hero-title"
                 style={{
                   fontFamily: "var(--font-display)",
                   fontSize: "clamp(42px, 6.5vw, 80px)",
@@ -203,11 +217,10 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
 
             {/* Description */}
             <p
-              className="leading-relaxed mb-10"
+              className="text-gray-300 text-lg md:text-xl mb-10 max-w-xl leading-relaxed drop-shadow-md"
               style={{
                 color: "rgba(255,255,255,0.7)",
                 fontSize: "15px",
-                lineHeight: 1.7,
                 maxWidth: "480px",
                 paddingLeft: 20,
                 marginBottom: 36,
@@ -215,13 +228,14 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
                 overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {currentMovie.description}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-3" style={{ paddingLeft: 20 }}>
+            <div className="hero-cta-row flex flex-wrap items-center gap-3" style={{ paddingLeft: 20 }}>
               {currentMovie.status === "Upcoming" ? (
                 <div
                   style={{
@@ -275,35 +289,37 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
       {/* Navigation Arrows */}
       <button
         onClick={prevMovie}
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all"
+        className="hero-arrow absolute left-4 top-1/2 -translate-y-1/2 z-10 rounded-full flex items-center justify-center transition-all"
         style={{
           background: "rgba(6,6,6,0.6)",
           border: "1px solid rgba(255,255,255,0.15)",
           color: "#fff",
           backdropFilter: "blur(10px)",
+          width: 44, height: 44,
         }}
         id="hero-prev"
       >
-        <ChevronLeft size={22} />
+        <ChevronLeft size={20} />
       </button>
       <button
         onClick={nextMovie}
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all"
+        className="hero-arrow absolute right-4 top-1/2 -translate-y-1/2 z-10 rounded-full flex items-center justify-center transition-all"
         style={{
           background: "rgba(6,6,6,0.6)",
           border: "1px solid rgba(255,255,255,0.15)",
           color: "#fff",
           backdropFilter: "blur(10px)",
+          width: 44, height: 44,
         }}
         id="hero-next"
       >
-        <ChevronRight size={22} />
+        <ChevronRight size={20} />
       </button>
 
       {/* Mute Toggle */}
       <button
         onClick={() => setMuted(!muted)}
-        className="absolute bottom-32 right-6 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all"
+        className="hero-mute hidden md:flex absolute bottom-32 right-6 z-10 w-10 h-10 rounded-full items-center justify-center transition-all"
         style={{
           background: "rgba(6,6,6,0.6)",
           border: "1px solid rgba(255,255,255,0.2)",
@@ -315,7 +331,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+      <div className="hero-dots absolute bottom-6 md:bottom-24 left-1/2 -translate-x-1/2 z-10 flex gap-2">
         {movies.map((_, idx) => (
           <button
             key={idx}

@@ -772,55 +772,153 @@ function NavbarInner() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — full-screen overlay */}
       <AnimatePresence>
         {showMobileMenu && (
           <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-[70px] right-0 bottom-0 w-72 z-50 md:hidden"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="fixed top-[60px] left-0 right-0 z-50 md:hidden"
             style={{
-              background: "rgba(10,10,10,0.98)",
-              borderLeft: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
+              background: "rgba(10,10,10,0.97)",
+              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              backdropFilter: "blur(28px)",
+              WebkitBackdropFilter: "blur(28px)",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
             }}
             id="mobile-menu"
           >
-            <div className="p-6 flex flex-col gap-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all"
+            <div style={{ padding: "12px 16px 20px" }}>
+
+              {/* User chip */}
+              {user && (
+                <div
                   style={{
-                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "10px 14px",
+                    marginBottom: 12,
+                    borderRadius: 14,
                     background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.07)",
                   }}
                 >
-                  <Film size={16} style={{ color: "var(--zyperr-red)" }} />
-                  {link.label}
-                </Link>
-              ))}
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background: "var(--zyperr-red)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 15,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {user.name?.[0]?.toUpperCase() ?? "U"}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, lineHeight: "1.2", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {user.name}
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.38)", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Nav Links */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {navLinks.map((link) => {
+                  const linkUrl = new URL(link.href, "http://x");
+                  const linkType = linkUrl.searchParams.get("type");
+                  const currentType = searchParams.get("type");
+                  const isActive =
+                    pathname === linkUrl.pathname &&
+                    (linkType ? currentType === linkType : !currentType);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setShowMobileMenu(false)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "12px 14px",
+                        borderRadius: 12,
+                        fontSize: 14,
+                        fontWeight: isActive ? 600 : 500,
+                        color: isActive ? "#fff" : "rgba(255,255,255,0.6)",
+                        background: isActive ? "rgba(229,9,20,0.14)" : "transparent",
+                        textDecoration: "none",
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      <span style={{ color: isActive ? "var(--zyperr-red)" : "rgba(255,255,255,0.3)", display: "flex" }}>
+                        {link.icon}
+                      </span>
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: "rgba(255,255,255,0.07)", margin: "10px 0" }} />
+
+              {/* Admin */}
               {user?.role === "ADMIN" && (
                 <Link
                   href="/admin"
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium"
-                  style={{ color: "var(--zyperr-red-light)", background: "rgba(229,9,20,0.1)" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "12px 14px",
+                    borderRadius: 12,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "var(--zyperr-red-light)",
+                    background: "rgba(229,9,20,0.08)",
+                    textDecoration: "none",
+                    marginBottom: 2,
+                  }}
                 >
-                  <Shield size={16} /> Admin Panel
+                  <Shield size={14} style={{ flexShrink: 0 }} /> Admin Panel
                 </Link>
               )}
+
+              {/* Sign Out */}
               <button
                 onClick={() => { handleLogout(); setShowMobileMenu(false); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium mt-4"
-                style={{ color: "rgba(255,255,255,0.5)", background: "rgba(255,255,255,0.04)" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: "rgba(255,255,255,0.38)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  width: "100%",
+                  textAlign: "left",
+                }}
               >
-                <LogOut size={16} /> Sign Out
+                <LogOut size={14} style={{ flexShrink: 0 }} /> Sign Out
               </button>
+
             </div>
           </motion.div>
         )}
