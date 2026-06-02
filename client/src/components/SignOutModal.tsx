@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, X } from "lucide-react";
 
@@ -8,7 +10,15 @@ interface SignOutModalProps {
 }
 
 export default function SignOutModal({ isOpen, onClose, onConfirm }: SignOutModalProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <>
@@ -101,6 +111,7 @@ export default function SignOutModal({ isOpen, onClose, onConfirm }: SignOutModa
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
