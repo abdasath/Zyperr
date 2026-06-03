@@ -35,6 +35,21 @@ function NavbarInner() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.setProperty("overflow", "hidden", "important");
+      document.documentElement.style.setProperty("overflow", "hidden", "important");
+    } else {
+      document.body.style.removeProperty("overflow");
+      document.documentElement.style.removeProperty("overflow");
+    }
+    return () => {
+      document.body.style.removeProperty("overflow");
+      document.documentElement.style.removeProperty("overflow");
+    };
+  }, [showMobileMenu]);
+
   const handleLogout = () => {
     logout();
     router.push("/");
@@ -772,25 +787,27 @@ function NavbarInner() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Menu — full-screen overlay */}
+      {/* Mobile Menu — Right-side Drawer */}
       <AnimatePresence>
         {showMobileMenu && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="fixed top-[60px] left-0 right-0 z-50 md:hidden"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 250 }}
+            className="fixed top-[60px] right-0 bottom-0 z-[999] md:hidden"
             style={{
-              background: "rgba(10,10,10,0.97)",
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
-              backdropFilter: "blur(28px)",
-              WebkitBackdropFilter: "blur(28px)",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+              width: 280,
+              background: "rgba(13,13,16,0.95)",
+              borderLeft: "1px solid rgba(255,255,255,0.07)",
+              backdropFilter: "blur(48px) saturate(200%)",
+              WebkitBackdropFilter: "blur(48px) saturate(200%)",
+              boxShadow: "-12px 0 40px rgba(0,0,0,0.6)",
+              overflowY: "auto",
             }}
             id="mobile-menu"
           >
-            <div style={{ padding: "12px 16px 20px" }}>
+            <div style={{ padding: "20px 16px 30px" }}>
 
               {/* User chip */}
               {user && (
@@ -925,15 +942,26 @@ function NavbarInner() {
       </AnimatePresence>
 
       {/* Backdrop for dropdowns */}
-      {(showDropdown || showMobileMenu) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setShowDropdown(false);
-            setShowMobileMenu(false);
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {(showDropdown || showMobileMenu) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[990]"
+            style={{
+              background: showMobileMenu ? "rgba(0,0,0,0.6)" : "transparent",
+              backdropFilter: showMobileMenu ? "blur(4px)" : "none",
+              WebkitBackdropFilter: showMobileMenu ? "blur(4px)" : "none",
+            }}
+            onClick={() => {
+              setShowDropdown(false);
+              setShowMobileMenu(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

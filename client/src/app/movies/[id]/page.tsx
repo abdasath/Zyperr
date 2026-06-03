@@ -408,7 +408,7 @@ export default function MovieDetailPage() {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4" style={{ paddingLeft: 20 }}>
+            <div className="flex flex-wrap items-center gap-4 movie-action-buttons" style={{ paddingLeft: 20 }}>
               {movie.status === "Upcoming" ? (
                 <div
                   style={{
@@ -710,7 +710,7 @@ export default function MovieDetailPage() {
               </span>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 movie-related-grid">
               {related.map((m, idx) => (
                 <motion.div
                   key={m.id}
@@ -738,7 +738,7 @@ export default function MovieDetailPage() {
               {isSeries ? "Movies and anime" : "Series and anime"} you might also enjoy
             </p>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 movie-related-grid">
               {crossTypeRelated.map((m, idx) => (
                 <motion.div
                   key={m.id}

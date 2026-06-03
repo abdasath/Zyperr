@@ -71,6 +71,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* ============================================
@@ -678,12 +679,21 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 
 @media (max-width: 767px) {
+  /* Prevent horizontal overflow that shifts fixed navbar off-screen */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
   .page-container {
     padding: 0 20px;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 
   .browse-container {
     padding: 0 20px !important;
+    max-width: 100% !important;
   }
 
   .hero-title {
@@ -925,6 +935,78 @@ h1, h2, h3, h4, h5, h6 {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
   }
+
+  /* ── Movie Detail Page ── */
+  .movie-action-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Play Now — 60% width, single line */
+  .movie-action-buttons > *:first-child {
+    flex: 0 0 calc(60% - 5px) !important;
+    font-size: 12px !important;
+    padding: 13px 8px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    letter-spacing: -0.02em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+  }
+
+  /* Add to List — 40% width */
+  .movie-action-buttons > *:nth-child(2) {
+    flex: 0 0 calc(40% - 5px) !important;
+    font-size: 12px !important;
+    padding: 13px 6px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+  }
+
+  /* Watch Trailer — auto width, wraps naturally to row 2, NO empty dark cell */
+  .movie-action-buttons > *:nth-child(3) {
+    flex: 0 0 auto !important;
+    font-size: 12px !important;
+    padding: 11px 20px !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+  }
+
+  /* ── Image bottom fade (cinema-style gradient instead of hard cut) ── */
+  /* Movie card thumbnails */
+  [id^="movie-card-"] img {
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%) !important;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%) !important;
+  }
+
+  /* Fix inline image bottom gap (descender line) */
+  img {
+    display: block !important;
+    vertical-align: bottom !important;
+  }
+
+  /* Related grids: 3 columns, smaller cards, tighter gap */
+  .movie-related-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
 }
 
 /* ============================================
@@ -932,12 +1014,20 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 
 @media (max-width: 480px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
   .page-container {
     padding: 0 14px;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 
   .browse-container {
     padding: 0 14px !important;
+    max-width: 100% !important;
   }
 
   .navbar {

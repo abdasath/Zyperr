@@ -49,11 +49,13 @@ const INITIAL: MovieForm = {
 
 const GENRES = [
   "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime",
-  "Cyberpunk", "Dark Comedy", "Documentary", "Drama", "Family", "Fantasy",
-  "History", "Horror", "Isekai", "Martial Arts", "Mecha", "Music", 
-  "Musical", "Mystery", "Noir", "Post-Apocalyptic", "Psychological", 
-  "Romance", "Sci-Fi", "Shonen", "Slasher", "Sports", "Superhero", 
-  "Supernatural", "Survival", "Thriller", "War", "Western", "Zombie"
+  "Cyberpunk", "Dark Comedy", "Disaster", "Documentary", "Drama", "Epic",
+  "Family", "Fantasy", "Heist", "History", "Horror", "Isekai", "Magic",
+  "Martial Arts", "Mecha", "Mockumentary", "Music", "Musical", "Mystery",
+  "Neo-Noir", "Noir", "Political", "Post-Apocalyptic", "Psychological",
+  "Romance", "Sci-Fi", "Shonen", "Slasher", "Sports", "Spy", "Stand-up",
+  "Superhero", "Supernatural", "Survival", "Suspense", "Teen", "Thriller",
+  "War", "Western", "Zombie"
 ];
 
 const STATUSES = ["Ongoing", "Completed", "Upcoming"];
