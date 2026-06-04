@@ -168,6 +168,19 @@ function BrowseContent() {
     activeType === "ALL" || c.contentType === activeType || (!c.contentType && activeType === "MOVIE")
   );
 
+  // ── Custom Dynamic Rows ──
+  // Popular: highly rated, sorted by rating descending
+  const popularMovies = [...filteredContent]
+    .filter(c => c.rating && c.rating >= 8.0)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+  // Best of Hollywood: English MOVIES (no series/anime) sorted by latest release
+  const hollywoodMovies = [...filteredContent]
+    .filter(c => c.contentType === "MOVIE" && c.language && c.language.toLowerCase().includes("english"))
+    .sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
+  // Get unique franchises
+  const franchises = Array.from(new Set(filteredContent.filter(c => c.franchise).map(c => c.franchise)));
+
   const isFiltered = !!activeGenre || !!searchQuery || !!activeViewAll;
   // Hero banner only on ALL (home) page
   const showHero   = !isFiltered && bannerMovies.length > 0 && activeType === "ALL";
@@ -570,6 +583,30 @@ function BrowseContent() {
             {(activeType === "ALL" || activeType === "MOVIE")      && movies.length > 0 && <MovieRow title="Movies"     icon={<Clapperboard size={16} />} movies={movies} accent="red"    onSeeAll={() => handleViewAll("movies")} />}
             {(activeType === "ALL" || activeType === "WEB_SERIES") && series.length > 0 && <MovieRow title="Web Series" icon={<Tv size={16} />}           movies={series} accent="blue"   onSeeAll={() => handleViewAll("series")} />}
             {(activeType === "ALL" || activeType === "ANIME")      && anime.length  > 0 && <MovieRow title="Anime"       icon={<Swords size={16} />}       movies={anime}  accent="purple" onSeeAll={() => handleViewAll("anime")} />}
+            
+            {/* ── Dynamic Franchise Rows ── */}
+            {activeType === "ALL" && franchises.map((franchise) => {
+              const franchiseMovies = filteredContent.filter(c => c.franchise === franchise);
+              if (franchiseMovies.length === 0) return null;
+              return (
+                <MovieRow 
+                  key={franchise} 
+                  title={franchise} 
+                  icon={<Film size={16} />} 
+                  movies={franchiseMovies} 
+                  accent="red" 
+                />
+              )
+            })}
+
+            {/* ── Best of Hollywood & Popular ── */}
+            {activeType === "ALL" && popularMovies.length > 0 && (
+              <MovieRow title="Popular" icon={<TrendingUp size={16} />} movies={popularMovies} accent="gold" />
+            )}
+            {activeType === "ALL" && hollywoodMovies.length > 0 && (
+              <MovieRow title="Best of Hollywood" icon={<Star size={16} />} movies={hollywoodMovies} accent="blue" />
+            )}
+
             {featured.length > 0 && activeType === "ALL"                                 && <MovieRow title="Featured"   icon={<Star size={16} />}           movies={featured} accent="gold" onSeeAll={() => handleViewAll("featured")} />}
           </div>
         )}

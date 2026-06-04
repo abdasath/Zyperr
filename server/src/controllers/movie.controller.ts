@@ -108,8 +108,8 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
   try {
     const {
       title, description, genre, contentType, releaseYear, duration, language,
-      rating, thumbnailUrl, bannerUrl, trailerUrl, videoUrl, cast,
-      director, studio, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder,
+      rating, thumbnailUrl, bannerUrl, trailerUrl, teaserUrl, videoUrl, cast,
+      director, studio, franchise, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder,
     } = req.body;
 
     if (!title || !description || !genre || !releaseYear || !duration || !language
@@ -145,8 +145,12 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
         rating: parseFloat(rating),
         thumbnailUrl, bannerUrl,
         trailerUrl: trailerUrl || null,
-        videoUrl, cast, director,
+        teaserUrl: teaserUrl || null,
+        videoUrl,
+        cast,
+        director,
         studio: studio || null,
+        franchise,
         totalSeasons: totalSeasons ? parseInt(totalSeasons) : null,
         totalEpisodes: totalEpisodes ? parseInt(totalEpisodes) : null,
         status: status || null,
@@ -175,8 +179,8 @@ export const updateMovie = async (req: Request, res: Response): Promise<void> =>
 
     const {
       title, description, genre, contentType, releaseYear, duration, language,
-      rating, thumbnailUrl, bannerUrl, trailerUrl, videoUrl, cast,
-      director, studio, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder,
+      rating, thumbnailUrl, bannerUrl, trailerUrl, teaserUrl, videoUrl, cast,
+      director, studio, franchise, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder,
     } = req.body;
 
     const type = contentType && ["MOVIE", "WEB_SERIES", "ANIME"].includes(contentType)
@@ -197,10 +201,12 @@ export const updateMovie = async (req: Request, res: Response): Promise<void> =>
         thumbnailUrl: thumbnailUrl ?? movie.thumbnailUrl,
         bannerUrl: bannerUrl ?? movie.bannerUrl,
         trailerUrl: trailerUrl !== undefined ? trailerUrl : movie.trailerUrl,
+        teaserUrl: teaserUrl !== undefined ? teaserUrl : movie.teaserUrl,
         videoUrl: videoUrl ?? movie.videoUrl,
         cast: cast ?? movie.cast,
         director: director ?? movie.director,
         studio: studio !== undefined ? studio : movie.studio,
+        franchise: franchise !== undefined ? franchise : movie.franchise,
         totalSeasons: totalSeasons !== undefined ? (totalSeasons !== "" ? parseInt(totalSeasons) : null) : movie.totalSeasons,
         totalEpisodes: totalEpisodes !== undefined ? (totalEpisodes !== "" ? parseInt(totalEpisodes) : null) : movie.totalEpisodes,
         status: status !== undefined ? status : movie.status,

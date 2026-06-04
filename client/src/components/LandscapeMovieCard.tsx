@@ -54,9 +54,11 @@ export default function LandscapeMovieCard({ movie, showGenre = true }: Landscap
   const isSeries           = contentType === "WEB_SERIES" || contentType === "ANIME";
 
   const durationLabel = isSeries
-    ? movie.totalEpisodes
-      ? `${movie.totalEpisodes} eps`
-      : `${movie.duration}m / ep`
+    ? movie.totalSeasons
+      ? `${movie.totalSeasons} Season${movie.totalSeasons > 1 ? 's' : ''}`
+      : movie.totalEpisodes
+        ? `${movie.totalEpisodes} eps`
+        : `${movie.duration}m / ep`
     : `${Math.floor(movie.duration / 60)}h ${movie.duration % 60}m`;
 
   const statusColor =

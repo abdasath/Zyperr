@@ -26,6 +26,7 @@ interface MovieForm {
   thumbnailUrl: string;
   bannerUrl: string;
   trailerUrl: string;
+  teaserUrl: string;
   videoUrl: string;
   cast: string;
   director: string;
@@ -42,8 +43,8 @@ interface MovieForm {
 const INITIAL: MovieForm = {
   title: "", description: "", genre: "", contentType: "MOVIE", releaseYear: "",
   duration: "", language: "English", rating: "", thumbnailUrl: "",
-  bannerUrl: "", trailerUrl: "", videoUrl: "", cast: "", director: "",
-  studio: "", totalSeasons: "", totalEpisodes: "", status: "",
+  bannerUrl: "", trailerUrl: "", teaserUrl: "", videoUrl: "", cast: "", director: "",
+  studio: "", franchise: "", totalSeasons: "", totalEpisodes: "", status: "",
   featured: false, trending: false, showOnBanner: false, bannerOrder: 0,
 };
 
@@ -434,18 +435,16 @@ export default function AddMoviePage() {
                           onBlur={() => setFocusedField(null)}
                         />
                       </Field>
-                      {form.contentType === "ANIME" && (
                         <Field label="Studio" icon={<Building2 size={13} />}>
                           <input
                             id="studio" name="studio" type="text"
-                            placeholder="e.g. MAPPA, ufotable"
+                            placeholder="e.g. MAPPA, Warner Bros"
                             value={form.studio} onChange={handleChange}
                             style={iStyle("studio")}
                             onFocus={() => setFocusedField("studio")}
                             onBlur={() => setFocusedField(null)}
                           />
                         </Field>
-                      )}
                       <Field label="Language" icon={<Globe size={13} />} required>
                         <input
                           id="language" name="language" type="text"
@@ -453,6 +452,16 @@ export default function AddMoviePage() {
                           value={form.language} onChange={handleChange} required
                           style={iStyle("language")}
                           onFocus={() => setFocusedField("language")}
+                          onBlur={() => setFocusedField(null)}
+                        />
+                      </Field>
+                      <Field label="Universe/Franchise" icon={<Building2 size={13} />}>
+                        <input
+                          id="franchise" name="franchise" type="text"
+                          placeholder="e.g. MCU, DCU, MonsterVerse"
+                          value={form.franchise} onChange={handleChange}
+                          style={iStyle("franchise")}
+                          onFocus={() => setFocusedField("franchise")}
                           onBlur={() => setFocusedField(null)}
                         />
                       </Field>
@@ -648,6 +657,19 @@ export default function AddMoviePage() {
                           onFocus={() => setFocusedField("trailerUrl")}
                           onBlur={() => setFocusedField(null)}
                         />
+                      </Field>
+                      <Field label="Teaser URL — Banner only (optional)" icon={<Ticket size={13} />}>
+                        <input
+                          id="teaserUrl" name="teaserUrl" type="url"
+                          placeholder="https://youtube.com/… (short teaser for hero banner)"
+                          value={form.teaserUrl} onChange={handleChange}
+                          style={iStyle("teaserUrl")}
+                          onFocus={() => setFocusedField("teaserUrl")}
+                          onBlur={() => setFocusedField(null)}
+                        />
+                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+                          If provided, this short teaser plays on the hero banner instead of the full trailer.
+                        </p>
                       </Field>
                     </div>
                   </div>

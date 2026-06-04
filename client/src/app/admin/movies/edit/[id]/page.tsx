@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Save, Edit2, CheckCircle2, Info, Link2,
   LayoutGrid, Star, TrendingUp, Film, User2, Users,
-  Globe, Clock, Calendar, Hash, ImageIcon, Video, Ticket,
+  Globe, Clock, Calendar, Hash, ImageIcon, Video, Ticket, Building2
 } from "lucide-react";
 import { moviesApi } from "@/lib/api";
 import Navbar from "@/components/Navbar";
@@ -16,8 +16,8 @@ import AdminGuard from "@/components/AdminGuard";
 const INITIAL = {
   title: "", description: "", genre: "", releaseYear: "",
   duration: "", language: "English", rating: "", thumbnailUrl: "",
-  bannerUrl: "", trailerUrl: "", videoUrl: "", cast: "", director: "",
-  featured: false, trending: false, showOnBanner: false, bannerOrder: 0,
+  bannerUrl: "", trailerUrl: "", teaserUrl: "", videoUrl: "", cast: "", director: "",
+  studio: "", franchise: "", featured: false, trending: false, showOnBanner: false, bannerOrder: 0,
   contentType: "MOVIE", totalSeasons: "", totalEpisodes: "", status: "",
 };
 
@@ -128,9 +128,12 @@ export default function EditMoviePage() {
           thumbnailUrl: m.thumbnailUrl,
           bannerUrl: m.bannerUrl,
           trailerUrl: m.trailerUrl || "",
-          videoUrl: m.videoUrl,
-          cast: m.cast,
-          director: m.director,
+          teaserUrl: m.teaserUrl || "",
+          videoUrl: m.videoUrl || "",
+          cast: m.cast || "",
+          director: m.director || "",
+          studio: m.studio || "",
+          franchise: m.franchise || "",
           featured: m.featured || false,
           trending: m.trending || false,
           showOnBanner: m.showOnBanner || false,
@@ -331,11 +334,11 @@ export default function EditMoviePage() {
                   </div>
                 </motion.div>
 
-                {/* ── People ── */}
+                {/* ── People & Context ── */}
                 <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
                   <div style={cardStyle}>
-                    <p style={sectionTitle}>People</p>
-                    <p style={sectionSub}>Director, cast and language</p>
+                    <p style={sectionTitle}>Details</p>
+                    <p style={sectionSub}>Director, cast, studio and universe</p>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
                       <Field label="Director" icon={<User2 size={12} />} required>
                         <input
@@ -354,6 +357,26 @@ export default function EditMoviePage() {
                           value={form.cast} onChange={handleChange} required
                           style={iStyle("cast")}
                           onFocus={() => setFocused("cast")}
+                          onBlur={() => setFocused(null)}
+                        />
+                      </Field>
+                      <Field label="Studio" icon={<Building2 size={12} />}>
+                        <input
+                          id="edit-studio" name="studio" type="text"
+                          placeholder="e.g. Warner Bros"
+                          value={form.studio} onChange={handleChange}
+                          style={iStyle("studio")}
+                          onFocus={() => setFocused("studio")}
+                          onBlur={() => setFocused(null)}
+                        />
+                      </Field>
+                      <Field label="Universe/Franchise" icon={<Building2 size={12} />}>
+                        <input
+                          id="edit-franchise" name="franchise" type="text"
+                          placeholder="e.g. MCU"
+                          value={form.franchise} onChange={handleChange}
+                          style={iStyle("franchise")}
+                          onFocus={() => setFocused("franchise")}
                           onBlur={() => setFocused(null)}
                         />
                       </Field>
@@ -544,6 +567,19 @@ export default function EditMoviePage() {
                           onFocus={() => setFocused("trailerUrl")}
                           onBlur={() => setFocused(null)}
                         />
+                      </Field>
+                      <Field label="Teaser URL — Banner only (optional)" icon={<Video size={12} />}>
+                        <input
+                          id="edit-teaser" name="teaserUrl" type="url"
+                          placeholder="https://youtube.com/… (short teaser for hero banner)"
+                          value={(form as any).teaserUrl} onChange={handleChange}
+                          style={iStyle("teaserUrl")}
+                          onFocus={() => setFocused("teaserUrl")}
+                          onBlur={() => setFocused(null)}
+                        />
+                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>
+                          If provided, this short teaser plays on the hero banner instead of the full trailer.
+                        </p>
                       </Field>
                     </div>
                   </div>
