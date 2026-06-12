@@ -30,6 +30,7 @@ interface MovieRowProps {
   cardSize?: "sm" | "md" | "lg";
   icon?: React.ReactNode;
   accent?: "red" | "blue" | "purple" | "gold";
+  isSubRow?: boolean;
   onSeeAll?: () => void;
 }
 
@@ -40,7 +41,7 @@ const ACCENT_MAP = {
   gold:   { color: "#f5c518", glow: "rgba(245,197,24,0.5)",  bg: "rgba(245,197,24,0.12)" },
 };
 
-export default function MovieRow({ title, movies, cardSize = "md", icon, accent = "red", onSeeAll }: MovieRowProps) {
+export default function MovieRow({ title, movies, cardSize = "md", icon, accent = "red", isSubRow = false, onSeeAll }: MovieRowProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const { color, glow, bg } = ACCENT_MAP[accent];
 
@@ -67,7 +68,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
         className="movie-row-header"
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          marginBottom: 6, padding: "0 48px", paddingTop: 32,
+          marginBottom: 6, padding: "0 48px", paddingTop: isSubRow ? 16 : 32,
         }}
       >
         <motion.div
@@ -78,7 +79,7 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
         >
           {/* Accent bar */}
           <div style={{
-            width: 4, height: 22, borderRadius: 3,
+            width: isSubRow ? 3 : 4, height: isSubRow ? 18 : 22, borderRadius: 3,
             background: color,
             boxShadow: `0 0 10px ${glow}`,
             flexShrink: 0,
@@ -97,9 +98,9 @@ export default function MovieRow({ title, movies, cardSize = "md", icon, accent 
 
           <h2 className="movie-row-title" style={{
             fontFamily: "var(--font-display)",
-            fontSize: 30,
-            fontWeight: 800,
-            color: "#fff",
+            fontSize: isSubRow ? 22 : 30,
+            fontWeight: isSubRow ? 700 : 800,
+            color: isSubRow ? "rgba(255,255,255,0.9)" : "#fff",
             letterSpacing: "-0.025em",
             lineHeight: 1.2,
           }}>

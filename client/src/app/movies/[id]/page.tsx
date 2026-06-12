@@ -380,7 +380,7 @@ export default function MovieDetailPage() {
                 <span style={{ fontWeight: 500 }}>{movie.language}</span>
               </div>
 
-              {movie.status && (
+              {(movie.status && (movie.contentType !== "MOVIE" || movie.status === "Upcoming")) && (
                 <>
                   <DotSeparator />
                   <span style={{
@@ -563,6 +563,8 @@ export default function MovieDetailPage() {
           <div className="lg:col-span-4">
             <div
               style={{
+                position: "sticky",
+                top: 120,
                 background: "rgba(20,20,20,0.6)",
                 backdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.08)",
@@ -672,9 +674,6 @@ export default function MovieDetailPage() {
                         S{selectedSeason < 10 ? `0${selectedSeason}` : selectedSeason} E{ep.episodeNumber < 10 ? `0${ep.episodeNumber}` : ep.episodeNumber}{ep.title.toLowerCase() !== `episode ${ep.episodeNumber}` && ` · ${ep.title}`}
                         <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.4)" }} />
                       </h4>
-                      <span style={{ fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
-                        {ep.duration}m
-                      </span>
                     </div>
                     <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", marginBottom: 12 }}>
                       {ep.airdate}

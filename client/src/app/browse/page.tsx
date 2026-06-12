@@ -6,6 +6,7 @@ import { moviesApi } from "@/lib/api";
 import MovieCard from "@/components/MovieCard";
 import LandscapeMovieCard from "@/components/LandscapeMovieCard";
 import HeroBanner from "@/components/HeroBanner";
+import BrandTiles from "@/components/BrandTiles";
 import MovieRow from "@/components/MovieRow";
 import { Search, Film, Tv, SlidersHorizontal, X, Swords, TrendingUp, Star, Clapperboard, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -68,7 +69,7 @@ function BrowseContent() {
   const fetchContent = useCallback(async () => {
     try {
       setLoading(true);
-      const params: Record<string, any> = { limit: 200 };
+      const params: Record<string, any> = { limit: 10000 };
       if (activeType !== "ALL") params.contentType = activeType;
       if (activeGenre)          params.genre        = activeGenre;
       // Remove server-side search to enforce robust client-side case-insensitive filtering
@@ -178,8 +179,30 @@ function BrowseContent() {
   const hollywoodMovies = [...filteredContent]
     .filter(c => c.contentType === "MOVIE" && c.language && c.language.toLowerCase().includes("english"))
     .sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
-  // Get unique franchises
-  const franchises = Array.from(new Set(filteredContent.filter(c => c.franchise).map(c => c.franchise)));
+  // Get unique directors with >= 2 movies
+  const directorCounts: Record<string, number> = {};
+  filteredContent.forEach(c => {
+    if (c.director) {
+      c.director.split(',').forEach(d => {
+        const name = d.trim();
+        if (name) directorCounts[name] = (directorCounts[name] || 0) + 1;
+      });
+    }
+  });
+  const topDirectors = Object.keys(directorCounts).filter(d => directorCounts[d] >= 6);
+
+  // Get unique franchises (filter out manually typed director rows and hub prefixes to avoid duplicates)
+  const franchises = Array.from(new Set(filteredContent.filter(c => c.franchise).map(c => c.franchise)))
+    .filter(f => {
+      const lowerF = f.toLowerCase();
+      // Ignore if user typed "From [Director]" or if it matches an auto-generated director name
+      if (lowerF.startsWith("from ")) return false;
+      if (topDirectors.some(d => lowerF.includes(d.toLowerCase()))) return false;
+      // Dynamically exclude ALL Brand Hub franchises
+      if (lowerF.startsWith("dc:")) return false;
+      if (lowerF.startsWith("marvel:")) return false;
+      return true;
+    });
 
   const isFiltered = !!activeGenre || !!searchQuery || !!activeViewAll;
   // Hero banner only on ALL (home) page
@@ -230,7 +253,11 @@ function BrowseContent() {
       <Navbar />
 
       {/* ── Hero Banner ── */}
-      {showHero ? <HeroBanner movies={bannerMovies} /> : <div style={{ height: 70 }} />}
+      {!searchQuery && !activeViewAll && (
+        showHero && bannerMovies.length > 0 
+          ? <HeroBanner movies={bannerMovies} /> 
+          : <div style={{ height: "65vh", minHeight: 500 }} />
+      )}
 
       {/* ══════════════════════════════════════════════════
           STICKY FILTER BAR  (type tabs + search)
@@ -563,6 +590,7 @@ function BrowseContent() {
         ) : (
           /* ── Default Row View ── */
           <div style={{ paddingTop: 8 }}>
+            <BrandTiles />
             {trendingFiltered.length > 0 && (
               <MovieRow
                 title={
@@ -580,9 +608,21 @@ function BrowseContent() {
                 onSeeAll={() => handleViewAll("trending")}
               />
             )}
-            {(activeType === "ALL" || activeType === "MOVIE")      && movies.length > 0 && <MovieRow title="Movies"     icon={<Clapperboard size={16} />} movies={movies} accent="red"    onSeeAll={() => handleViewAll("movies")} />}
-            {(activeType === "ALL" || activeType === "WEB_SERIES") && series.length > 0 && <MovieRow title="Web Series" icon={<Tv size={16} />}           movies={series} accent="blue"   onSeeAll={() => handleViewAll("series")} />}
-            {(activeType === "ALL" || activeType === "ANIME")      && anime.length  > 0 && <MovieRow title="Anime"       icon={<Swords size={16} />}       movies={anime}  accent="purple" onSeeAll={() => handleViewAll("anime")} />}
+            {activeType === "MOVIE"      && movies.length > 0 && <MovieRow title="Movies"     icon={<Clapperboard size={16} />} movies={movies} accent="red"    onSeeAll={() => handleViewAll("movies")} />}
+            {activeType === "WEB_SERIES" && series.length > 0 && <MovieRow title="Web Series" icon={<Tv size={16} />}           movies={series} accent="blue"   onSeeAll={() => handleViewAll("series")} />}
+            {activeType === "ANIME"      && anime.length  > 0 && <MovieRow title="Anime"       icon={<Swords size={16} />}       movies={anime}  accent="purple" onSeeAll={() => handleViewAll("anime")} />}
+            
+            {/* ── Curated Premium Rows ── */}
+            {activeType === "ALL" && (
+              <>
+                {filteredContent.filter(c => c.releaseYear >= 2024).length > 0 && (
+                  <MovieRow title="New Releases" icon={<Star size={16} />} movies={filteredContent.filter(c => c.releaseYear >= 2024)} accent="red" />
+                )}
+                {filteredContent.filter(c => c.rating >= 8.2).length > 0 && (
+                  <MovieRow title="Critically Acclaimed" icon={<Star size={16} />} movies={filteredContent.filter(c => c.rating >= 8.2)} accent="gold" />
+                )}
+              </>
+            )}
             
             {/* ── Dynamic Franchise Rows ── */}
             {activeType === "ALL" && franchises.map((franchise) => {
@@ -595,6 +635,21 @@ function BrowseContent() {
                   icon={<Film size={16} />} 
                   movies={franchiseMovies} 
                   accent="red" 
+                />
+              )
+            })}
+
+            {/* ── Dynamic Director Rows ── */}
+            {activeType === "ALL" && topDirectors.map((director) => {
+              const directorMovies = filteredContent.filter(c => c.director && c.director.includes(director));
+              if (directorMovies.length === 0) return null;
+              return (
+                <MovieRow 
+                  key={`director-${director}`} 
+                  title={`From ${director}`} 
+                  icon={<Clapperboard size={16} />} 
+                  movies={directorMovies} 
+                  accent="blue" 
                 />
               )
             })}

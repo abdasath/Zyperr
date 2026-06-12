@@ -259,7 +259,7 @@ export default function MovieCard({ movie, size = "md", showGenre = true, hideWa
             <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>
               {movie.releaseYear}
             </span>
-            {movie.status && (
+            {(movie.status && (movie.contentType !== "MOVIE" || movie.status === "Upcoming")) && (
               <span style={{
                 fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                 background: `${statusColor}18`, color: statusColor,

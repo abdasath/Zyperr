@@ -46,7 +46,7 @@ export default function AdminPage() {
   const fetchMovies = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await moviesApi.getAll({ limit: 100 });
+      const res = await moviesApi.getAll({ limit: 10000 });
       setMovies(res.data.movies || []);
     } catch {}
     setLoading(false);

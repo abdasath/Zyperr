@@ -270,14 +270,36 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
       const player = playerRef.current;
       if (!player) return;
       if (document.hidden) {
-        if (typeof player.getPlayerState === "function" && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-          player.pauseVideo();
-          shouldPlayWhenVisible.current = true;
-        }
+        // Tab hidden: pause the video and remember we should resume later
+        clearTimers();
+        try {
+          if (typeof player.getPlayerState === "function" && player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+          }
+        } catch { /* ignore */ }
+        shouldPlayWhenVisible.current = true;
       } else {
-        if (inViewportRef.current && shouldPlayWhenVisible.current) {
-          if (typeof player.playVideo === "function") player.playVideo();
-          shouldPlayWhenVisible.current = false;
+        // Tab visible again: ALWAYS re-sync the player to the correct current slide.
+        // This prevents stale videos from playing over a new banner if the slide
+        // auto-advanced while the tab was in the background.
+        if (!inViewportRef.current) return;
+        shouldPlayWhenVisible.current = false;
+
+        const correctVideoId = getBannerVideoId(movies[currentIdxRef.current]);
+        if (!correctVideoId) return;
+
+        let actualVideoId: string | null = null;
+        try { actualVideoId = player.getVideoData()?.video_id || null; } catch { /* ignore */ }
+
+        if (actualVideoId !== correctVideoId) {
+          // Wrong video is loaded — reset state and load the correct one
+          clearTimers();
+          setVideoReady(false);
+          inImagePhase.current = true;
+          try { player.mute(); player.loadVideoById({ videoId: correctVideoId }); } catch { /* ignore */ }
+        } else {
+          // Correct video is loaded, just resume it
+          try { if (typeof player.playVideo === "function") player.playVideo(); } catch { /* ignore */ }
         }
       }
     };
@@ -300,6 +322,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
     didTriggerNext.current = false;
     inImagePhase.current = true;
     mutedRef.current = true;
+    shouldPlayWhenVisible.current = false; // cancel any pending "play when visible" for old slide
     if (typeof window !== "undefined") setMuted(true);
 
     if (isMobile) {
@@ -313,13 +336,39 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
 
     if (!player || typeof player.loadVideoById !== "function") {
       // Player not ready yet — handled by onReady above
-      if (!videoId) startFallback();
+      if (!videoId) {
+        startFallback();
+      } else if (!player && window.YT && window.YT.Player) {
+        // Recover if player was somehow skipped
+        playerRef.current = new window.YT.Player("yt-player-div", {
+          videoId,
+          playerVars: {
+            autoplay: 1, controls: 0, mute: 1, rel: 0, modestbranding: 1,
+            iv_load_policy: 3, disablekb: 1, playsinline: 1, fs: 0, showinfo: 0,
+          },
+          events: {
+            onReady: (e: any) => { e.target.setVolume(100); e.target.mute(); },
+            onStateChange: (e: any) => {
+              if (e.data === window.YT.PlayerState.PLAYING) {
+                try { e.target.setPlaybackQuality('hd1080'); } catch {}
+                setTimeout(() => setVideoReady(true), 400);
+                startPolling();
+              } else if (e.data === window.YT.PlayerState.ENDED) {
+                if (!didTriggerNext.current) { didTriggerNext.current = true; goNext(); }
+              }
+            },
+            onError: () => startFallback(),
+          }
+        });
+      }
       return;
     }
 
     if (videoId) {
-      player.mute(); // force mute during new load
-      player.loadVideoById({ videoId });
+      try {
+        player.mute(); // force mute during new load
+        player.loadVideoById({ videoId });
+      } catch { /* ignore */ }
     } else {
       // No trailer — hide video and use fallback timer
       try { player.stopVideo(); } catch { /* ignore */ }

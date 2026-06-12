@@ -122,16 +122,21 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
       ? contentType
       : "MOVIE";
 
-    // Prevent duplicate titles (SQLite-safe case-insensitive check)
+    // Prevent duplicate titles of the same content type only
+    // (allows e.g. "The Flash" Movie AND "The Flash" Web Series to coexist)
     const existingMovie = await prisma.movie.findFirst({
-      where: { title: { contains: title, mode: 'insensitive' } }
+      where: {
+        title: { equals: title, mode: 'insensitive' },
+        contentType: type,
+      }
     });
 
     const isDuplicate = existingMovie &&
       existingMovie.title.toLowerCase() === title.toLowerCase();
 
     if (isDuplicate) {
-      res.status(409).json({ message: `"${title}" already exists in the database. Please choose a different title.` });
+      const typeLabel = type === "MOVIE" ? "Movie" : type === "WEB_SERIES" ? "Web Series" : "Anime";
+      res.status(409).json({ message: `"${title}" already exists as a ${typeLabel} in the database.` });
       return;
     }
 
@@ -150,7 +155,7 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
         cast,
         director,
         studio: studio || null,
-        franchise,
+        franchise: franchise || null,
         totalSeasons: totalSeasons ? parseInt(totalSeasons) : null,
         totalEpisodes: totalEpisodes ? parseInt(totalEpisodes) : null,
         status: status || null,

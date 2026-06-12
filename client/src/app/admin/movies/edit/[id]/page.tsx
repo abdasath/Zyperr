@@ -111,6 +111,15 @@ export default function EditMoviePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [focused, setFocused] = useState<string | null>(null);
+  const [existingFranchises, setExistingFranchises] = useState<string[]>([]);
+
+  useEffect(() => {
+    moviesApi.getAll({ limit: 10000 }).then(res => {
+      const all = res.data.movies || [];
+      const uniques = Array.from(new Set(all.map((m: any) => m.franchise).filter(Boolean)));
+      setExistingFranchises(uniques as string[]);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -124,7 +133,7 @@ export default function EditMoviePage() {
           releaseYear: String(m.releaseYear),
           duration: String(m.duration),
           language: m.language,
-          rating: String(m.rating),
+          rating: m.rating === 0 ? "-" : String(m.rating),
           thumbnailUrl: m.thumbnailUrl,
           bannerUrl: m.bannerUrl,
           trailerUrl: m.trailerUrl || "",
@@ -180,7 +189,8 @@ export default function EditMoviePage() {
     setError("");
     setIsLoading(true);
     try {
-      await moviesApi.update(id, form);
+      const payload = { ...form, rating: form.rating === "-" ? 0 : Number(form.rating) };
+      await moviesApi.update(id, payload);
       setSuccess(true);
       setTimeout(() => router.push("/admin"), 1600);
     } catch (err: any) {
@@ -373,12 +383,16 @@ export default function EditMoviePage() {
                       <Field label="Universe/Franchise" icon={<Building2 size={12} />}>
                         <input
                           id="edit-franchise" name="franchise" type="text"
-                          placeholder="e.g. MCU"
+                          list="franchise-list"
+                          placeholder="e.g. Marvel: MCU: Phase One"
                           value={form.franchise} onChange={handleChange}
                           style={iStyle("franchise")}
                           onFocus={() => setFocused("franchise")}
                           onBlur={() => setFocused(null)}
                         />
+                        <datalist id="franchise-list">
+                          {existingFranchises.map(f => <option key={f} value={f} />)}
+                        </datalist>
                       </Field>
                       <Field label="Language" icon={<Globe size={12} />} required>
                         <input
@@ -460,8 +474,8 @@ export default function EditMoviePage() {
                       </Field>
                       <Field label="Rating (0–10)" icon={<Star size={12} />} required>
                         <input
-                          id="edit-rating" name="rating" type="number"
-                          placeholder="e.g. 8.5" min="0" max="10" step="0.1"
+                          id="edit-rating" name="rating" type="text"
+                          placeholder="e.g. 8.5 or -"
                           value={form.rating} onChange={handleChange} required
                           style={iStyle("rating")}
                           onFocus={() => setFocused("rating")}
@@ -490,20 +504,20 @@ export default function EditMoviePage() {
                               onBlur={() => setFocused(null)}
                             />
                           </Field>
-                          <Field label="Status" icon={<Ticket size={12} />}>
-                            <select
-                              id="edit-status" name="status"
-                              value={form.status} onChange={handleChange}
-                              style={{ ...iStyle("status"), appearance: "none" as any }}
-                              onFocus={() => setFocused("status")}
-                              onBlur={() => setFocused(null)}
-                            >
-                              <option value="">Select status</option>
-                              {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                          </Field>
                         </>
                       )}
+                      <Field label="Status" icon={<Ticket size={12} />}>
+                        <select
+                          id="edit-status" name="status"
+                          value={form.status} onChange={handleChange}
+                          style={{ ...iStyle("status"), appearance: "none" as any }}
+                          onFocus={() => setFocused("status")}
+                          onBlur={() => setFocused(null)}
+                        >
+                          <option value="">Select status</option>
+                          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </Field>
                     </div>
                   </div>
                 </motion.div>
@@ -548,11 +562,11 @@ export default function EditMoviePage() {
                           </div>
                         )}
                       </Field>
-                      <Field label="Video URL" icon={<Video size={12} />} required>
+                      <Field label="Video URL (optional)" icon={<Video size={12} />}>
                         <input
                           id="edit-video" name="videoUrl" type="url"
                           placeholder="https://…/video.mp4"
-                          value={form.videoUrl} onChange={handleChange} required
+                          value={form.videoUrl} onChange={handleChange}
                           style={iStyle("videoUrl")}
                           onFocus={() => setFocused("videoUrl")}
                           onBlur={() => setFocused(null)}

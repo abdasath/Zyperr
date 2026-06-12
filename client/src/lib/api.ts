@@ -56,7 +56,7 @@ export default api;
 export const moviesApi = {
   getAll: (params?: Record<string, any>) => api.get("/movies", { params }),
   getByType: (contentType: "MOVIE" | "WEB_SERIES" | "ANIME", params?: Record<string, any>) =>
-    api.get("/movies", { params: { contentType, limit: 100, ...params } }),
+    api.get("/movies", { params: { contentType, ...params } }),
   getFeatured: () => api.get("/movies/featured"),
   getBanner: () => api.get("/movies/banner"),
   getTrending: () => api.get("/movies/trending"),
