@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  async rewrites() {
+    return [
+      {
+        // Whenever the frontend asks for anything starting with /api...
+        source: "/api/:path*",
+        // ...Vercel will secretly fetch it from your Railway backend instead!
+        destination: "https://zyperr-production.up.railway.app/api/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
