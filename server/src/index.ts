@@ -17,17 +17,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowed = (process.env.CLIENT_URL || "http://localhost:3000")
-        .split(",")
-        .map(o => o.trim());
-      if (!origin || allowed.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: [
+      "http://localhost:3000",
+      "https://zyperr.vercel.app",
+      "https://zyperr-oewx-2mw4gflsh-abd-asaths-projects.vercel.app"
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 app.use(helmet());
