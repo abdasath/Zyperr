@@ -48,6 +48,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [watchlistIds, setWatchlistIds] = useState<Set<string>>(new Set());
   const [muted, setMuted] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
 
@@ -321,9 +322,7 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
     setVideoReady(false);
     didTriggerNext.current = false;
     inImagePhase.current = true;
-    mutedRef.current = true;
     shouldPlayWhenVisible.current = false; // cancel any pending "play when visible" for old slide
-    if (typeof window !== "undefined") setMuted(true);
 
     if (isMobile) {
       // On mobile, just set an 8-second timer to cycle the static banner image
@@ -631,9 +630,57 @@ export default function HeroBanner({ movies }: HeroBannerProps) {
       </button>
 
       {/* ── Volume Button ── */}
-      <button onClick={() => setMuted(!muted)} className="hero-mute hidden md:flex absolute bottom-32 right-6 z-10 w-10 h-10 rounded-full items-center justify-center transition-all" style={{ background: "rgba(6,6,6,0.6)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff" }} id="hero-mute">
-        {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-      </button>
+      <div className="hidden md:flex absolute bottom-32 right-6 z-10">
+        <motion.button
+          layout
+          onClick={() => { setMuted(!muted); setHasInteracted(true); }}
+          className="hero-mute flex items-center overflow-hidden cursor-pointer hover:bg-[rgba(20,20,20,0.7)] transition-colors"
+          style={{ 
+            background: "rgba(6,6,6,0.6)", 
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.25)", 
+            color: "#fff",
+            height: 40,
+            borderRadius: 20,
+          }}
+          initial={false}
+          animate={{ paddingRight: muted && !hasInteracted ? "16px" : "0px" }}
+          transition={{ layout: { type: "spring", stiffness: 400, damping: 30 } }}
+          id="hero-mute"
+        >
+          <motion.div layout className="flex items-center justify-center w-10 h-10 shrink-0">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={muted ? "muted" : "unmuted"}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center justify-center"
+              >
+                {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+          
+          <motion.div
+            initial={false}
+            animate={{ 
+              width: muted && !hasInteracted ? "auto" : 0,
+              opacity: muted && !hasInteracted ? 1 : 0
+            }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <span 
+              className="whitespace-nowrap text-[13px] font-semibold tracking-wide pl-1 flex items-center h-10"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              Tap to unmute
+            </span>
+          </motion.div>
+        </motion.button>
+      </div>
 
       {/* ── Slide Indicators ── */}
       <div className="hero-dots absolute bottom-6 md:bottom-24 left-1/2 -translate-x-1/2 z-10 flex gap-2">
