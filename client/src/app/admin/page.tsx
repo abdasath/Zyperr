@@ -372,6 +372,11 @@ export default function AdminPage() {
                         {["Title", "Type", "Genre", "Year", "Rating", "Status", "Actions"].map((h) => (
                           <th
                             key={h}
+                            className={
+                              h === "Genre" || h === "Year" ? "hidden md:table-cell" :
+                              h === "Rating" || h === "Status" ? "hidden lg:table-cell" :
+                              ""
+                            }
                             style={{
                               padding: "13px 20px", textAlign: "left",
                               fontSize: 10, fontWeight: 700, letterSpacing: "0.09em",
@@ -444,7 +449,7 @@ export default function AdminPage() {
                             </td>
 
                             {/* Genre */}
-                            <td style={{ padding: "14px 20px" }}>
+                            <td className="hidden md:table-cell" style={{ padding: "14px 20px" }}>
                               <span style={{
                                 fontSize: 11, fontWeight: 500, padding: "4px 11px", borderRadius: 20,
                                 background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)",
@@ -455,12 +460,12 @@ export default function AdminPage() {
                             </td>
 
                             {/* Year */}
-                            <td style={{ padding: "14px 20px", color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 500 }}>
+                            <td className="hidden md:table-cell" style={{ padding: "14px 20px", color: "rgba(255,255,255,0.5)", fontSize: 14, fontWeight: 500 }}>
                               {movie.releaseYear}
                             </td>
 
                             {/* Rating */}
-                            <td style={{ padding: "14px 20px" }}>
+                            <td className="hidden lg:table-cell" style={{ padding: "14px 20px" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                                 <Star size={12} fill="#fbbf24" color="#fbbf24" />
                                 <span style={{ color: "#fbbf24", fontWeight: 700, fontSize: 14 }}>
@@ -470,7 +475,7 @@ export default function AdminPage() {
                             </td>
 
                             {/* Status */}
-                            <td style={{ padding: "14px 20px" }}>
+                            <td className="hidden lg:table-cell" style={{ padding: "14px 20px" }}>
                               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                   <span style={{

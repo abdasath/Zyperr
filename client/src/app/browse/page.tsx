@@ -86,7 +86,11 @@ function BrowseContent() {
       setAllContent(shuffleArray(contentRes.data.movies ?? []));
       setFeatured(shuffleArray(featuredRes.data ?? []));
       setBannerMovies(shuffleArray(bannerRes.data ?? []));
-      setTrending(shuffleArray(trendingRes.data ?? []));
+      
+      // Derive trending directly from the full dataset to bypass the API's 10-item limit
+      const allTrending = (contentRes.data.movies ?? []).filter((c: any) => c.trending);
+      setTrending(shuffleArray(allTrending));
+      
       setGenres(genresRes.data ?? []);
     } catch (err) {
       console.error(err);
@@ -179,28 +183,65 @@ function BrowseContent() {
   const hollywoodMovies = [...filteredContent]
     .filter(c => c.contentType === "MOVIE" && c.language && c.language.toLowerCase().includes("english"))
     .sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
-  // Get unique directors with >= 2 movies
+  // Get unique directors with >= 6 movies
   const directorCounts: Record<string, number> = {};
   filteredContent.forEach(c => {
     if (c.director) {
       c.director.split(',').forEach(d => {
         const name = d.trim();
-        if (name) directorCounts[name] = (directorCounts[name] || 0) + 1;
+        const lowerName = name.toLowerCase();
+        
+        // Ignore placeholders and specific directors who just repeat massive franchises
+        if (
+          !name || 
+          lowerName === "various" || 
+          lowerName === "unknown" || 
+          lowerName === "n/a" || 
+          lowerName === "peter jackson" ||
+          lowerName === "david yates" // Excluding David Yates to prevent Harry Potter repetition as well
+        ) return;
+        
+        directorCounts[name] = (directorCounts[name] || 0) + 1;
       });
     }
   });
   const topDirectors = Object.keys(directorCounts).filter(d => directorCounts[d] >= 6);
 
+  const lotrOrder = [
+    "LOTR: The Lord of the Rings Trilogy",
+    "LOTR: The Hobbit Trilogy",
+    "LOTR: Series",
+    "LOTR: Animated Films (Classic)"
+  ];
+  const lotrFranchises = Array.from(new Set(filteredContent.filter(c => c.franchise && c.franchise.startsWith("LOTR: ")).map(c => c.franchise)));
+  const hasLotr = lotrFranchises.length > 0;
+
+  const hpOrder = [
+    "HP: The Wizarding World (Main Saga)",
+    "HP: Fantastic Beasts (Prequel Saga)",
+    "HP: Return to Hogwarts (Specials & Documentaries)",
+    "HP: Harry Potter (HBO Series)"
+  ];
+  const hpFranchises = Array.from(new Set(filteredContent.filter(c => c.franchise && c.franchise.startsWith("HP: ")).map(c => c.franchise)));
+  const hasHp = hpFranchises.length > 0;
+
+  const ffFranchise = "Fast & Furious — Complete Saga";
+  const ffMovies = filteredContent.filter(c => c.franchise === ffFranchise);
+  const hasFF = ffMovies.length > 0;
+
   // Get unique franchises (filter out manually typed director rows and hub prefixes to avoid duplicates)
   const franchises = Array.from(new Set(filteredContent.filter(c => c.franchise).map(c => c.franchise)))
     .filter(f => {
-      const lowerF = f.toLowerCase();
+      const lowerF = f!.toLowerCase();
       // Ignore if user typed "From [Director]" or if it matches an auto-generated director name
       if (lowerF.startsWith("from ")) return false;
       if (topDirectors.some(d => lowerF.includes(d.toLowerCase()))) return false;
       // Dynamically exclude ALL Brand Hub franchises
       if (lowerF.startsWith("dc:")) return false;
       if (lowerF.startsWith("marvel:")) return false;
+      if (lowerF.startsWith("lotr:")) return false;
+      if (lowerF.startsWith("hp:")) return false;
+      if (f === ffFranchise) return false;
       return true;
     });
 
@@ -256,7 +297,7 @@ function BrowseContent() {
       {!searchQuery && !activeViewAll && (
         showHero && bannerMovies.length > 0 
           ? <HeroBanner movies={bannerMovies} /> 
-          : <div style={{ height: "65vh", minHeight: 500 }} />
+          : <div style={{ height: 70 }} />
       )}
 
       {/* ══════════════════════════════════════════════════
@@ -488,7 +529,89 @@ function BrowseContent() {
                   </button>
                 </div>
               ) : (
-                <div className="browse-container" style={{ padding: "0 48px" }}>
+                <>
+                  {/* ── Category Hybrid Rows ── */}
+                  {isCategoryPage && !isFiltered && (
+                    <div style={{ paddingTop: 32, paddingBottom: 24 }}>
+                      {(() => {
+                        const typeLabel = activeType === "MOVIE" ? "Movies" : activeType === "WEB_SERIES" ? "Series" : "Anime";
+                        const trendingCat = trending.filter(c => c.contentType === activeType || (!c.contentType && activeType === "MOVIE"));
+                        const newCat = gridContent.filter(c => (c.releaseYear || 0) >= 2024);
+                        const acclaimedCat = gridContent.filter(c => (c.rating || 0) >= 8.2);
+                        
+                        // Sort genres by frequency in this category
+                        const genreCounts: Record<string, number> = {};
+                        gridContent.forEach(c => {
+                          if (c.genre) c.genre.split(',').forEach(g => {
+                            let t = g.trim();
+                            // Combine Action and Adventure to reduce redundancy
+                            if (t === "Action" || t === "Adventure") {
+                              t = "Action & Adventure";
+                            }
+                            if (t) genreCounts[t] = (genreCounts[t] || 0) + 1;
+                          });
+                        });
+                        const catGenres = Object.keys(genreCounts)
+                          .filter(g => genreCounts[g] >= 4) // Only genres with enough content
+                          .sort((a, b) => genreCounts[b] - genreCounts[a])
+                          .slice(0, 5); // Take top 5
+
+                        const colors: ("red" | "blue" | "purple" | "gold")[] = ["purple", "red", "blue", "gold"];
+
+                        return (
+                          <>
+                            {trendingCat.length > 0 && <MovieRow title={`Trending ${typeLabel}`} movies={trendingCat} accent="red" />}
+                            {newCat.length > 0 && <MovieRow title={`New Releases`} movies={newCat} accent="gold" />}
+                            {acclaimedCat.length > 0 && <MovieRow title={`Critically Acclaimed`} movies={acclaimedCat} accent="blue" />}
+                            
+                            {/* ── Explicit Allowed Collections for Movies Tab ── */}
+                            {activeType === "MOVIE" && [
+                              "Pirates of the Caribbean Collection",
+                              "The Terminator Collection",
+                              "Jurassic Collection",
+                              "Avatar Collection",
+                              "Friday the 13th Collection",
+                              "The Matrix Collection",
+                              "The Conjuring Universe"
+                            ].map((franchise) => {
+                              const franchiseMovies = gridContent.filter(c => c.franchise === franchise);
+                              if (franchiseMovies.length === 0) return null;
+                              return (
+                                <MovieRow 
+                                  key={franchise} 
+                                  title={franchise} 
+                                  icon={<Film size={16} />}
+                                  movies={franchiseMovies.sort((a, b) => (a.releaseYear || 0) - (b.releaseYear || 0))} 
+                                  accent="gold" 
+                                />
+                              );
+                            })}
+                            
+                            {catGenres.map((genre, idx) => {
+                              const genreMovies = gridContent.filter(c => {
+                                if (genre === "Action & Adventure") {
+                                  return c.genre?.includes("Action") || c.genre?.includes("Adventure");
+                                }
+                                return c.genre?.includes(genre);
+                              });
+                              
+                              if (genreMovies.length < 4) return null;
+                              
+                              // Shift the array by an offset to prevent identical-looking rows
+                              // Since heavily correlated genres (e.g. Action and Adventure) contain the same items in the same order,
+                              // shifting them makes the UI look significantly more varied and fresh.
+                              const offset = (idx * 3) % genreMovies.length;
+                              const shiftedMovies = [...genreMovies.slice(offset), ...genreMovies.slice(0, offset)];
+                              
+                              return <MovieRow key={genre} title={`${genre} ${typeLabel}`} movies={shiftedMovies} accent={colors[idx % colors.length]} />;
+                            })}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  <div className="browse-container" style={{ padding: "0 48px" }}>
                   {/* View All Header */}
                   {activeViewAll && (
                     <div style={{ marginBottom: 40, marginTop: 100 }}>
@@ -584,7 +707,8 @@ function BrowseContent() {
                     </div>
                   )}
                 </div>
-              )}
+              </>
+            )}
             </motion.div>
           </AnimatePresence>
         ) : (
@@ -623,21 +747,75 @@ function BrowseContent() {
                 )}
               </>
             )}
-            
-            {/* ── Dynamic Franchise Rows ── */}
-            {activeType === "ALL" && franchises.map((franchise) => {
-              const franchiseMovies = filteredContent.filter(c => c.franchise === franchise);
-              if (franchiseMovies.length === 0) return null;
-              return (
+
+            {/* ── The Lord of the Rings Collection ── */}
+            {activeType === "ALL" && hasLotr && (
+              <div style={{ marginBottom: 48, marginTop: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 48px', marginBottom: -10 }}>
+                  <div style={{ width: 4, height: 26, background: '#f5c518', borderRadius: 4, boxShadow: '0 0 10px rgba(245,197,24,0.5)' }} />
+                  <h2 style={{ fontSize: 32, fontWeight: 800, margin: 0, color: 'white', letterSpacing: '-0.025em', fontFamily: 'var(--font-display)' }}>
+                    The Lord of the Rings Collection
+                  </h2>
+                </div>
+                {lotrOrder.map(saga => {
+                  const sagaMovies = filteredContent.filter(c => c.franchise === saga);
+                  if (sagaMovies.length === 0) return null;
+                  return (
+                    <MovieRow 
+                      key={saga}
+                      title={saga.replace("LOTR: ", "")} 
+                      movies={sagaMovies} 
+                      accent="gold" 
+                      isSubRow={true}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── Harry Potter Collection ── */}
+            {activeType === "ALL" && hasHp && (
+              <div style={{ marginBottom: 48, marginTop: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 48px', marginBottom: -10 }}>
+                  <div style={{ width: 4, height: 26, background: '#60a5fa', borderRadius: 4, boxShadow: '0 0 10px rgba(96,165,250,0.5)' }} />
+                  <h2 style={{ fontSize: 32, fontWeight: 800, margin: 0, color: 'white', letterSpacing: '-0.025em', fontFamily: 'var(--font-display)' }}>
+                    Harry Potter Collection
+                  </h2>
+                </div>
+                {hpOrder.map(saga => {
+                  const sagaMovies = filteredContent.filter(c => c.franchise === saga);
+                  if (sagaMovies.length === 0) return null;
+                  return (
+                    <MovieRow 
+                      key={saga}
+                      title={saga.replace("HP: ", "")} 
+                      movies={sagaMovies} 
+                      accent="blue" 
+                      isSubRow={true}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── Fast & Furious Complete Saga ── */}
+            {activeType === "ALL" && hasFF && (
+              <div style={{ marginBottom: 48, marginTop: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 48px', marginBottom: -10 }}>
+                  <div style={{ width: 4, height: 26, background: '#06b6d4', borderRadius: 4, boxShadow: '0 0 10px rgba(6,182,212,0.5)' }} />
+                  <h2 style={{ fontSize: 32, fontWeight: 800, margin: 0, color: 'white', letterSpacing: '-0.025em', fontFamily: 'var(--font-display)' }}>
+                    {ffFranchise}
+                  </h2>
+                </div>
                 <MovieRow 
-                  key={franchise} 
-                  title={franchise} 
-                  icon={<Film size={16} />} 
-                  movies={franchiseMovies} 
-                  accent="red" 
+                  title="The Films & Series" 
+                  movies={ffMovies.sort((a, b) => (a.releaseYear || 0) - (b.releaseYear || 0))} 
+                  accent="blue" 
+                  isSubRow={true}
                 />
-              )
-            })}
+              </div>
+            )}
+
 
             {/* ── Dynamic Director Rows ── */}
             {activeType === "ALL" && topDirectors.map((director) => {

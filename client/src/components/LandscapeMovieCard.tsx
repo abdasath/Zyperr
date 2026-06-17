@@ -220,11 +220,11 @@ export default function LandscapeMovieCard({ movie, showGenre = true }: Landscap
 
         {/* Meta row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>
-              {movie.releaseYear}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", fontWeight: 500 }}>
+              {movie.releaseYear || "TBD"}
             </span>
-            {movie.status && (
+            {(movie.status && (movie.contentType !== "MOVIE" || movie.status === "Upcoming")) && (
               <span style={{
                 fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
                 background: `${statusColor}18`, color: statusColor,

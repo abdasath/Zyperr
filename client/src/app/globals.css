@@ -996,16 +996,133 @@ h1, h2, h3, h4, h5, h6 {
     mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%) !important;
   }
 
-  /* Fix inline image bottom gap (descender line) */
+  /* Fix image bottom gap (descender line) */
   img {
     display: block !important;
     vertical-align: bottom !important;
   }
 
-  /* Related grids: 3 columns, smaller cards, tighter gap */
+  /* Related grids: 2 columns on tablet/mobile */
   .movie-related-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px !important;
+    align-items: stretch !important;
+    grid-auto-rows: 255px !important;  /* enforce identical row heights */
+  }
+
+  .content-grid {
+    align-items: stretch !important;
+    grid-auto-rows: 255px !important;
+  }
+
+  /* ── HARDCODED EQUAL CARD SIZES ── */
+  /* Lock the OUTER grid-cell wrapper first */
+  .movie-grid-cell {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 255px !important;
+    min-height: 255px !important;
+    max-height: 255px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Then lock the inner MovieCard */
+  .movie-related-grid .movie-card-grid-item,
+  .content-grid .movie-card-grid-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 255px !important;
+    min-height: 255px !important;
+    max-height: 255px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Poster: exactly 175px tall, fills card horizontally */
+  .movie-related-grid .movie-card-poster,
+  .content-grid .movie-card-poster {
+    width: 100% !important;
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
+    padding-bottom: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Image fills the poster area */
+  .movie-related-grid .movie-card-poster img,
+  .content-grid .movie-card-poster img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* Footer: takes remaining 80px */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"],
+  .content-grid .movie-card-grid-item a[id^="info-"] {
+    height: 80px !important;
+    max-height: 80px !important;
+    overflow: hidden !important;
+    padding: 7px 9px 6px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+
+  /* Title */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] h3,
+  .content-grid .movie-card-grid-item a[id^="info-"] h3 {
+    font-size: 11px !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.3 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Meta row: year + duration */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:first-of-type,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:first-of-type {
+    display: flex !important;
+    font-size: 9px !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Genre tags row */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:last-child,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:last-child {
+    display: flex !important;
+    height: 18px !important;
+    gap: 3px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:last-child span,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:last-child span {
+    font-size: 8px !important;
+    padding: 1px 5px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Detail page related sections */
+  .movie-detail-section {
+    margin-top: 40px !important;
+  }
+
+  .movie-detail-section h2 {
+    font-size: 20px !important;
   }
 }
 
@@ -1136,9 +1253,125 @@ h1, h2, h3, h4, h5, h6 {
     gap: 12px;
   }
 
-  /* Content grid 2 columns */
-  .content-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  /* Content + related grids: 2 columns, hardcoded equal height */
+  .content-grid,
+  .movie-related-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+    grid-auto-rows: 245px !important;  /* enforce identical row heights */
+  }
+
+  /* ── HARDCODED EQUAL CARD SIZES for small phones ── */
+  /* Lock OUTER grid-cell wrapper first */
+  .movie-grid-cell {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 245px !important;
+    min-height: 245px !important;
+    max-height: 245px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Then lock inner MovieCard */
+  .movie-related-grid .movie-card-grid-item,
+  .content-grid .movie-card-grid-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 245px !important;
+    min-height: 245px !important;
+    max-height: 245px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Poster: exactly 168px tall */
+  .movie-related-grid .movie-card-poster,
+  .content-grid .movie-card-poster {
+    width: 100% !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    max-height: 168px !important;
+    padding-bottom: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Image fills poster */
+  .movie-related-grid .movie-card-poster img,
+  .content-grid .movie-card-poster img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  /* Footer: remaining 77px */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"],
+  .content-grid .movie-card-grid-item a[id^="info-"] {
+    height: 77px !important;
+    max-height: 77px !important;
+    overflow: hidden !important;
+    padding: 6px 8px 5px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  /* Title */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] h3,
+  .content-grid .movie-card-grid-item a[id^="info-"] h3 {
+    font-size: 10px !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.3 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Meta row */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:first-of-type,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:first-of-type {
+    display: flex !important;
+    font-size: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Genre tags */
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:last-child,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:last-child {
+    display: flex !important;
+    height: 16px !important;
+    gap: 3px !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  .movie-related-grid .movie-card-grid-item a[id^="info-"] > div:last-child span,
+  .content-grid .movie-card-grid-item a[id^="info-"] > div:last-child span {
+    font-size: 8px !important;
+    padding: 1px 4px !important;
+  }
+
+  /* Detail page padding */
+  .page-container.pt-16 {
+    margin-top: 40px !important;
+    padding-bottom: 60px !important;
+  }
+
+  .movie-detail-section {
+    margin-top: 32px !important;
+  }
+
+  .movie-related-grid {
+    margin-top: 12px;
   }
 }

@@ -96,6 +96,7 @@ export default function MovieCard({ movie, size = "md", showGenre = true, hideWa
   return (
     <motion.div
       id={`movie-card-${movie.id}`}
+      className="movie-card-grid-item"
       style={{
         width,
         minWidth: width,
@@ -110,7 +111,7 @@ export default function MovieCard({ movie, size = "md", showGenre = true, hideWa
       transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
     >
       {/* ── Poster image ── */}
-      <div style={{ position: "relative", width, height, background: "#1a1a1a", overflow: "hidden" }}>
+      <div className="movie-card-poster" style={{ position: "relative", width, height, background: "#1a1a1a", overflow: "hidden" }}>
         {!imgError ? (
           <Image
             src={movie.thumbnailUrl}

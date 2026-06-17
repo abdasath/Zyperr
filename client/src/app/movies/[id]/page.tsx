@@ -167,15 +167,17 @@ export default function MovieDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
+      <div className="flex flex-col w-full" style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse"
-              style={{ background: "rgba(229,9,20,0.15)" }}>
-              <Film size={24} style={{ color: "var(--zyperr-red)" }} />
-            </div>
-            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px" }}>Loading content...</p>
+        <div className="flex-1 flex flex-col items-center justify-center w-full" style={{ minHeight: "calc(100vh - 100px)" }}>
+          <div className="flex items-center justify-center mb-4 rounded-2xl animate-pulse"
+            style={{ width: 64, height: 64, background: "rgba(229,9,20,0.12)" }}>
+            <Film size={28} style={{ color: "var(--zyperr-red)" }} />
+          </div>
+          <div className="w-full flex justify-center text-center m-0 p-0">
+            <p className="text-sm m-0 p-0" style={{ color: "rgba(255,255,255,0.4)", textAlign: "center" }}>
+              Loading content...
+            </p>
           </div>
         </div>
       </div>
@@ -694,7 +696,7 @@ export default function MovieDetailPage() {
 
         {/* Related Movies — same type */}
         {related.length > 0 && (
-          <div style={{ marginTop: 80 }}>
+          <div className="movie-detail-section" style={{ marginTop: 80 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
               <div style={{ width: 4, height: 20, background: "var(--zyperr-red)", borderRadius: 3, boxShadow: "0 0 10px rgba(229,9,20,0.5)" }} />
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: "#fff" }}>
@@ -713,6 +715,7 @@ export default function MovieDetailPage() {
               {related.map((m, idx) => (
                 <motion.div
                   key={m.id}
+                  className="movie-grid-cell"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
@@ -726,7 +729,7 @@ export default function MovieDetailPage() {
 
         {/* Cross-type recommendations — different type, same genre */}
         {crossTypeRelated.length > 0 && (
-          <div style={{ marginTop: 60 }}>
+          <div className="movie-detail-section" style={{ marginTop: 60 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
               <div style={{ width: 4, height: 20, background: "#60a5fa", borderRadius: 3, boxShadow: "0 0 10px rgba(96,165,250,0.5)" }} />
               <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: "#fff" }}>
@@ -741,6 +744,7 @@ export default function MovieDetailPage() {
               {crossTypeRelated.map((m, idx) => (
                 <motion.div
                   key={m.id}
+                  className="movie-grid-cell"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
