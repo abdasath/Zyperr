@@ -530,7 +530,7 @@ export default function MovieDetailPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
                   <div style={{ width: 4, height: 20, background: "var(--zyperr-red)", borderRadius: 3, boxShadow: "0 0 10px rgba(229,9,20,0.5)" }} />
                   <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: "#fff" }}>
-                    Top Cast
+                    {isAnime ? "Top Characters" : "Top Cast"}
                   </h2>
                 </div>
                 
