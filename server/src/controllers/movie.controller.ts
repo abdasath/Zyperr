@@ -113,7 +113,7 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
     } = req.body;
 
     if (!title || !description || !genre || !releaseYear || !duration || !language
-      || !rating || !thumbnailUrl || !bannerUrl || !videoUrl || !cast || !director) {
+      || rating === undefined || rating === null || !thumbnailUrl || !bannerUrl || typeof videoUrl !== "string" || !cast || !director) {
       res.status(400).json({ message: "Please provide all required fields" });
       return;
     }
