@@ -5,6 +5,7 @@ import { moviesApi } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MovieRow from "@/components/MovieRow";
+import SkeletonLoader from "@/components/SkeletonLoader";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -53,7 +54,7 @@ export default function DCHubPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
       {/* Hero Header */}
@@ -107,15 +108,9 @@ export default function DCHubPage() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: 1400, margin: "0 auto", paddingBottom: "60px", paddingTop: "20px" }}>
+      <div style={{ flex: 1, width: "100%", maxWidth: 1400, margin: "0 auto", paddingBottom: "60px", paddingTop: "20px" }}>
         {loading ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 80 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: "50%",
-              border: "2px solid rgba(0,85,255,0.25)", borderTopColor: "#0055ff",
-              animation: "spin 0.8s linear infinite",
-            }} />
-          </div>
+          <SkeletonLoader />
         ) : (
           <div>
             {Array.from(new Set(movies.map(m => m.franchise!)))
