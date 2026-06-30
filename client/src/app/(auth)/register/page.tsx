@@ -50,6 +50,20 @@ export default function RegisterPage() {
       return;
     }
 
+    // ── Frontend email validation ────────────────────────────────
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address (e.g. yourname@gmail.com)");
+      return;
+    }
+    const emailDomain = email.split("@")[1]?.toLowerCase();
+    const domainParts = emailDomain?.split(".");
+    if (!domainParts || domainParts.length < 2 || domainParts[domainParts.length - 1].length < 2) {
+      setError("Please use a real email domain (e.g. gmail.com, yahoo.com)");
+      return;
+    }
+
+
     setIsLoading(true);
     try {
       const response = await authApi.register(name, email, password);

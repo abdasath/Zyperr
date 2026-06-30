@@ -21,6 +21,42 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    // ── Email format validation ──────────────────────────────────
+    // Must match: something@something.validTLD (min 2 char TLD)
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ message: "Please enter a valid email address" });
+      return;
+    }
+
+    // ── Block known disposable/fake email domains ─────────────────
+    const blockedDomains = [
+      "mailinator.com", "guerrillamail.com", "temp-mail.org", "throwam.com",
+      "yopmail.com", "trashmail.com", "sharklasers.com", "guerrillamailblock.com",
+      "grr.la", "guerrillamail.info", "guerrillamail.biz", "guerrillamail.de",
+      "guerrillamail.net", "guerrillamail.org", "spam4.me", "fakeinbox.com",
+      "maildrop.cc", "dispostable.com", "mailnull.com", "spamgourmet.com",
+      "trashmail.me", "trashmail.at", "trashmail.io", "tempmail.com",
+      "10minutemail.com", "getairmail.com", "discard.email", "filzmail.com",
+      "spamfree24.org", "mt2015.com", "spamgob.com", "spamhereplease.com",
+      "binkmail.com", "bobmail.info", "letthemeatspam.com",
+    ];
+
+    const emailDomain = email.split("@")[1]?.toLowerCase();
+
+    if (blockedDomains.includes(emailDomain)) {
+      res.status(400).json({ message: "Disposable email addresses are not allowed. Please use a real email." });
+      return;
+    }
+
+    // ── Block domains with no valid TLD (e.g. newton@aedgf) ──────
+    // Valid TLDs must be at least 2 chars and the domain must have a dot
+    const domainParts = emailDomain?.split(".");
+    if (!domainParts || domainParts.length < 2 || domainParts[domainParts.length - 1].length < 2) {
+      res.status(400).json({ message: "Please enter a valid email address with a real domain (e.g. gmail.com)" });
+      return;
+    }
+
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
       res.status(400).json({ message: "User already exists" });
@@ -49,6 +85,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
