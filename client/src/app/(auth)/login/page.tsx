@@ -34,7 +34,13 @@ export default function LoginPage() {
         router.push("/browse");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong. Please try again.");
+      const data = err.response?.data;
+      // Redirect unverified users to OTP page instead of showing error
+      if (data?.requiresVerification) {
+        router.push(`/verify-otp?email=${encodeURIComponent(data.email || email)}`);
+        return;
+      }
+      setError(data?.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }

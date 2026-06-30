@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import prisma from "../config/db";
+import { generateOTP, sendOTPEmail } from "../utils/email";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -12,6 +13,7 @@ const generateToken = (id: string, role: string) => {
   });
 };
 
+// ─── REGISTER — creates unverified account + sends OTP ───────────
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, name } = req.body;
@@ -22,71 +24,170 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     }
 
     // ── Email format validation ──────────────────────────────────
-    // Must match: something@something.validTLD (min 2 char TLD)
     const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       res.status(400).json({ message: "Please enter a valid email address" });
       return;
     }
 
-    // ── Block known disposable/fake email domains ─────────────────
-    const blockedDomains = [
-      "mailinator.com", "guerrillamail.com", "temp-mail.org", "throwam.com",
-      "yopmail.com", "trashmail.com", "sharklasers.com", "guerrillamailblock.com",
-      "grr.la", "guerrillamail.info", "guerrillamail.biz", "guerrillamail.de",
-      "guerrillamail.net", "guerrillamail.org", "spam4.me", "fakeinbox.com",
-      "maildrop.cc", "dispostable.com", "mailnull.com", "spamgourmet.com",
-      "trashmail.me", "trashmail.at", "trashmail.io", "tempmail.com",
-      "10minutemail.com", "getairmail.com", "discard.email", "filzmail.com",
-      "spamfree24.org", "mt2015.com", "spamgob.com", "spamhereplease.com",
-      "binkmail.com", "bobmail.info", "letthemeatspam.com",
-    ];
-
-    const emailDomain = email.split("@")[1]?.toLowerCase();
-
-    if (blockedDomains.includes(emailDomain)) {
-      res.status(400).json({ message: "Disposable email addresses are not allowed. Please use a real email." });
-      return;
-    }
-
     // ── Block domains with no valid TLD (e.g. newton@aedgf) ──────
-    // Valid TLDs must be at least 2 chars and the domain must have a dot
+    const emailDomain = email.split("@")[1]?.toLowerCase();
     const domainParts = emailDomain?.split(".");
     if (!domainParts || domainParts.length < 2 || domainParts[domainParts.length - 1].length < 2) {
       res.status(400).json({ message: "Please enter a valid email address with a real domain (e.g. gmail.com)" });
       return;
     }
 
-    const userExists = await prisma.user.findUnique({ where: { email } });
-    if (userExists) {
-      res.status(400).json({ message: "User already exists" });
+    // ── Block known disposable/fake email domains ─────────────────
+    const blockedDomains = [
+      "mailinator.com", "guerrillamail.com", "temp-mail.org", "throwam.com",
+      "yopmail.com", "trashmail.com", "sharklasers.com", "grr.la",
+      "guerrillamail.info", "guerrillamail.biz", "guerrillamail.de",
+      "guerrillamail.net", "guerrillamail.org", "spam4.me", "fakeinbox.com",
+      "maildrop.cc", "dispostable.com", "trashmail.me", "trashmail.at",
+      "trashmail.io", "tempmail.com", "10minutemail.com", "getairmail.com",
+      "discard.email", "filzmail.com", "binkmail.com", "bobmail.info",
+    ];
+    if (blockedDomains.includes(emailDomain)) {
+      res.status(400).json({ message: "Disposable email addresses are not allowed. Please use a real email." });
+      return;
+    }
+
+    if (password.length < 6) {
+      res.status(400).json({ message: "Password must be at least 6 characters" });
+      return;
+    }
+
+    // ── Check if already registered and verified ──────────────────
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser && existingUser.isVerified) {
+      res.status(400).json({ message: "An account with this email already exists." });
       return;
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
+    if (existingUser && !existingUser.isVerified) {
+      // Update existing unverified account with fresh OTP
+      await prisma.user.update({
+        where: { email },
+        data: { name, password: hashedPassword, otp, otpExpiry },
+      });
+    } else {
+      // Create new unverified account
+      await prisma.user.create({
+        data: { name, email, password: hashedPassword, otp, otpExpiry, isVerified: false },
+      });
+    }
+
+    // Send OTP email via Resend
+    await sendOTPEmail(email, name, otp);
 
     res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user.id, user.role),
+      message: "Account created! Please check your email for a 6-digit verification code.",
+      email,
+      requiresVerification: true,
+    });
+  } catch (error) {
+    console.error("Register error:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// ─── VERIFY OTP ──────────────────────────────────────────────────
+export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      res.status(400).json({ message: "Email and OTP are required" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      res.status(404).json({ message: "Account not found. Please register again." });
+      return;
+    }
+
+    if (user.isVerified) {
+      res.status(400).json({ message: "This account is already verified. Please log in." });
+      return;
+    }
+
+    if (!user.otp || !user.otpExpiry) {
+      res.status(400).json({ message: "No OTP found. Please request a new one." });
+      return;
+    }
+
+    if (new Date() > user.otpExpiry) {
+      res.status(400).json({ message: "OTP has expired. Please request a new one." });
+      return;
+    }
+
+    if (user.otp !== otp.toString()) {
+      res.status(400).json({ message: "Invalid OTP. Please check and try again." });
+      return;
+    }
+
+    // Mark as verified, clear OTP
+    const verifiedUser = await prisma.user.update({
+      where: { email },
+      data: { isVerified: true, otp: null, otpExpiry: null },
+    });
+
+    res.status(200).json({
+      id: verifiedUser.id,
+      name: verifiedUser.name,
+      email: verifiedUser.email,
+      role: verifiedUser.role,
+      token: generateToken(verifiedUser.id, verifiedUser.role),
+      message: "Email verified successfully! Welcome to ZYPERR+",
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
 };
 
+// ─── RESEND OTP ──────────────────────────────────────────────────
+export const resendOTP = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
 
+    if (!email) {
+      res.status(400).json({ message: "Email is required" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      res.status(404).json({ message: "Account not found." });
+      return;
+    }
+
+    if (user.isVerified) {
+      res.status(400).json({ message: "This account is already verified." });
+      return;
+    }
+
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await prisma.user.update({ where: { email }, data: { otp, otpExpiry } });
+    await sendOTPEmail(email, user.name, otp);
+
+    res.status(200).json({ message: "A new verification code has been sent to your email." });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+// ─── LOGIN — blocks unverified accounts ──────────────────────────
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -104,6 +205,16 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
     if (!user.password) {
       res.status(401).json({ message: "This account was created using Google. Please Sign in with Google." });
+      return;
+    }
+
+    // ── Block login for unverified accounts ───────────────────────
+    if (!user.isVerified) {
+      res.status(403).json({
+        message: "Please verify your email before logging in.",
+        requiresVerification: true,
+        email: user.email,
+      });
       return;
     }
 
@@ -125,6 +236,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+// ─── GOOGLE LOGIN (auto-verified) ────────────────────────────────
 export const googleLogin = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token } = req.body;
@@ -137,7 +249,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
     const googleRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${token}` }
     });
-    
+
     if (!googleRes.ok) {
       res.status(400).json({ message: "Invalid Google token" });
       return;
@@ -155,12 +267,11 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
     if (!user) {
       user = await prisma.user.create({
-        data: {
-          email,
-          name: name || "User",
-          avatar: picture || null,
-        },
+        data: { email, name: name || "User", avatar: picture || null, isVerified: true },
       });
+    } else if (!user.isVerified) {
+      // Auto-verify Google users
+      user = await prisma.user.update({ where: { email }, data: { isVerified: true } });
     }
 
     res.status(200).json({
@@ -177,17 +288,12 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
+// ─── GET ME ───────────────────────────────────────────────────────
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: (req as any).user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
-      },
+      select: { id: true, name: true, email: true, role: true, avatar: true },
     });
 
     if (!user) {
