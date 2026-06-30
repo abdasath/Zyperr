@@ -13,7 +13,7 @@ const generateToken = (id: string, role: string) => {
   });
 };
 
-// ─── REGISTER — creates unverified account + sends OTP ───────────
+// ─── REGISTER — instantly creates account and logs in ───────────
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, name } = req.body;
@@ -58,38 +58,25 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // ── Check if already registered and verified ──────────────────
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser && existingUser.isVerified) {
+    if (existingUser) {
       res.status(400).json({ message: "An account with this email already exists." });
       return;
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    if (existingUser && !existingUser.isVerified) {
-      // Update existing unverified account with fresh OTP
-      await prisma.user.update({
-        where: { email },
-        data: { name, password: hashedPassword, otp, otpExpiry },
-      });
-    } else {
-      // Create new unverified account
-      await prisma.user.create({
-        data: { name, email, password: hashedPassword, otp, otpExpiry, isVerified: false },
-      });
-    }
-
-    // Send OTP email via Resend
-    await sendOTPEmail(email, name, otp);
+    const user = await prisma.user.create({
+      data: { name, email, password: hashedPassword, isVerified: true },
+    });
 
     res.status(201).json({
-      message: "Account created! Please check your email for a 6-digit verification code.",
-      email,
-      requiresVerification: true,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user.id, user.role),
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -187,7 +174,7 @@ export const resendOTP = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// ─── LOGIN — blocks unverified accounts ──────────────────────────
+// ─── LOGIN — allows all accounts ──────────────────────────
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -205,16 +192,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
     if (!user.password) {
       res.status(401).json({ message: "This account was created using Google. Please Sign in with Google." });
-      return;
-    }
-
-    // ── Block login for unverified accounts ───────────────────────
-    if (!user.isVerified) {
-      res.status(403).json({
-        message: "Please verify your email before logging in.",
-        requiresVerification: true,
-        email: user.email,
-      });
       return;
     }
 

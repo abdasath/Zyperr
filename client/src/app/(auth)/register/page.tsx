@@ -66,9 +66,9 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      await authApi.register(name, email, password);
-      // Don't log in yet — redirect to OTP verification
-      router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+      const response = await authApi.register(name, email, password);
+      login(response.data);
+      router.push("/browse");
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
