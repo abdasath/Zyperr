@@ -53,7 +53,7 @@ export default function RegisterPage() {
     // ── Frontend email validation ────────────────────────────────
     const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address (e.g. yourname@gmail.com)");
+      setError("Please enter a valid email address ");
       return;
     }
     const emailDomain = email.split("@")[1]?.toLowerCase();
