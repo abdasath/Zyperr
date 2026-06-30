@@ -216,7 +216,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 // ─── GOOGLE LOGIN (auto-verified) ────────────────────────────────
 export const googleLogin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { token } = req.body;
+    const { token, intent } = req.body;
 
     if (!token) {
       res.status(400).json({ message: "No token provided" });
@@ -243,12 +243,22 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
     let user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
+      if (intent === "login") {
+        res.status(404).json({ message: "Account not found. Please sign up first." });
+        return;
+      }
       user = await prisma.user.create({
         data: { email, name: name || "User", avatar: picture || null, isVerified: true },
       });
-    } else if (!user.isVerified) {
-      // Auto-verify Google users
-      user = await prisma.user.update({ where: { email }, data: { isVerified: true } });
+    } else {
+      if (intent === "register") {
+        res.status(400).json({ message: "An account with this email already exists. Please log in." });
+        return;
+      }
+      if (!user.isVerified) {
+        // Auto-verify Google users
+        user = await prisma.user.update({ where: { email }, data: { isVerified: true } });
+      }
     }
 
     res.status(200).json({

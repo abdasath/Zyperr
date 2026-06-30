@@ -80,7 +80,7 @@ export default function RegisterPage() {
     onSuccess: async (tokenResponse) => {
       try {
         setIsLoading(true);
-        const res = await authApi.googleLogin(tokenResponse.credential || tokenResponse.access_token);
+        const res = await authApi.googleLogin(tokenResponse.credential || tokenResponse.access_token, "register");
         login(res.data);
         if (res.data.role === "ADMIN") {
           router.push("/admin");
