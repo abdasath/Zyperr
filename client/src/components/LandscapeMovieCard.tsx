@@ -89,6 +89,7 @@ export default function LandscapeMovieCard({ movie, showGenre = true }: Landscap
   return (
     <motion.div
       id={`movie-card-land-${movie.id}`}
+      onClick={() => router.push(`/movies/${movie.id}`)}
       style={{
         width: "100%", // flexible width for grid
         maxWidth: 400,

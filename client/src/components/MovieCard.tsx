@@ -97,6 +97,7 @@ export default function MovieCard({ movie, size = "md", showGenre = true, hideWa
     <motion.div
       id={`movie-card-${movie.id}`}
       className="movie-card-grid-item"
+      onClick={() => router.push(`/movies/${movie.id}`)}
       style={{
         width,
         minWidth: width,
