@@ -190,22 +190,21 @@ export default function WatchlistPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
                     transition={{ duration: 0.3 }}
-                    className="relative group"
+                    className="relative group w-fit mx-auto"
                     id={`watchlist-item-${movie.id}`}
                   >
                     <MovieCard movie={movie} size="md" hideWatchlistButton />
                     {/* Remove Button */}
                     <button
                       onClick={() => removeMovie(movie.id)}
-                      className="absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110 shadow-lg"
+                      className="absolute -top-3.5 -right-3.5 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-110 shadow-[0_4px_12px_rgba(229,9,20,0.5)]"
                       style={{
                         background: "var(--zyperr-red)",
                         border: "2px solid #000"
                       }}
-                      title="Remove from watchlist"
                       id={`remove-watchlist-${movie.id}`}
                     >
-                      <Trash2 size={13} color="white" />
+                      <Trash2 size={14} color="white" />
                     </button>
                   </motion.div>
                 ))}
