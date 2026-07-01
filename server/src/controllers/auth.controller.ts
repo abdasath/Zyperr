@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import prisma from "../config/db";
-import { generateOTP, sendOTPEmail } from "../utils/email";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -84,95 +83,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// ─── VERIFY OTP ──────────────────────────────────────────────────
-export const verifyOTP = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      res.status(400).json({ message: "Email and OTP are required" });
-      return;
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user) {
-      res.status(404).json({ message: "Account not found. Please register again." });
-      return;
-    }
-
-    if (user.isVerified) {
-      res.status(400).json({ message: "This account is already verified. Please log in." });
-      return;
-    }
-
-    if (!user.otp || !user.otpExpiry) {
-      res.status(400).json({ message: "No OTP found. Please request a new one." });
-      return;
-    }
-
-    if (new Date() > user.otpExpiry) {
-      res.status(400).json({ message: "OTP has expired. Please request a new one." });
-      return;
-    }
-
-    if (user.otp !== otp.toString()) {
-      res.status(400).json({ message: "Invalid OTP. Please check and try again." });
-      return;
-    }
-
-    // Mark as verified, clear OTP
-    const verifiedUser = await prisma.user.update({
-      where: { email },
-      data: { isVerified: true, otp: null, otpExpiry: null },
-    });
-
-    res.status(200).json({
-      id: verifiedUser.id,
-      name: verifiedUser.name,
-      email: verifiedUser.email,
-      role: verifiedUser.role,
-      token: generateToken(verifiedUser.id, verifiedUser.role),
-      message: "Email verified successfully! Welcome to ZYPERR+",
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
-
-// ─── RESEND OTP ──────────────────────────────────────────────────
-export const resendOTP = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      res.status(400).json({ message: "Email is required" });
-      return;
-    }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user) {
-      res.status(404).json({ message: "Account not found." });
-      return;
-    }
-
-    if (user.isVerified) {
-      res.status(400).json({ message: "This account is already verified." });
-      return;
-    }
-
-    const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
-    await prisma.user.update({ where: { email }, data: { otp, otpExpiry } });
-    await sendOTPEmail(email, user.name, otp);
-
-    res.status(200).json({ message: "A new verification code has been sent to your email." });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
+// OTP functions removed
 
 // ─── LOGIN — allows all accounts ──────────────────────────
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
@@ -232,7 +143,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const payload = await googleRes.json();
+    const payload: any = await googleRes.json();
     if (!payload || !payload.email) {
       res.status(400).json({ message: "Invalid Google token payload" });
       return;

@@ -18,10 +18,18 @@ const PORT = process.env.PORT || 5000;
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+        "http://localhost:3000",
+        "https://zyperr.vercel.app",
+        "https://zyperr-oewx-2mw4gflsh-abd-asaths-projects.vercel.app"
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
-app.use((0, helmet_1.default)());
+app.use((0, helmet_1.default)({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+}));
 app.use((0, morgan_1.default)("dev"));
 // Routes
 app.use("/api/auth", auth_routes_1.default);

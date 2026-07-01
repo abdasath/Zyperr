@@ -6,19 +6,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMovie = exports.updateMovie = exports.createMovie = exports.getMovieById = exports.getGenres = exports.getTrending = exports.getBanner = exports.getFeatured = exports.getMovies = void 0;
 const db_1 = __importDefault(require("../config/db"));
 // GET /api/movies - list all content (public, paginated)
+// Uses raw SQL ILIKE for guaranteed case-insensitive search on PostgreSQL/Neon
 const getMovies = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
-        const genre = req.query.genre;
-        const search = req.query.search;
-        const contentType = req.query.contentType;
+        const genre = req.query.genre || "";
+        const search = req.query.search || "";
+        const contentType = req.query.contentType || "";
         const skip = (page - 1) * limit;
         const where = {};
         if (genre)
-            where.genre = { contains: genre };
+            where.genre = { contains: genre, mode: 'insensitive' };
         if (search)
-            where.title = { contains: search };
+            where.title = { contains: search, mode: 'insensitive' };
         if (contentType && ["MOVIE", "WEB_SERIES", "ANIME"].includes(contentType)) {
             where.contentType = contentType;
         }
@@ -29,6 +30,7 @@ const getMovies = async (req, res) => {
         res.json({ movies, total, page, totalPages: Math.ceil(total / limit) });
     }
     catch (error) {
+        console.error("GET MOVIES ERROR:", error);
         res.status(500).json({ message: "Server error", error });
     }
 };
@@ -113,23 +115,28 @@ exports.getMovieById = getMovieById;
 // POST /api/movies — admin only
 const createMovie = async (req, res) => {
     try {
-        const { title, description, genre, contentType, releaseYear, duration, language, rating, thumbnailUrl, bannerUrl, trailerUrl, videoUrl, cast, director, studio, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder, } = req.body;
+        const { title, description, genre, contentType, releaseYear, duration, language, rating, thumbnailUrl, bannerUrl, trailerUrl, teaserUrl, videoUrl, cast, director, studio, franchise, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder, } = req.body;
         if (!title || !description || !genre || !releaseYear || !duration || !language
-            || !rating || !thumbnailUrl || !bannerUrl || !videoUrl || !cast || !director) {
+            || rating === undefined || rating === null || !thumbnailUrl || !bannerUrl || typeof videoUrl !== "string" || !cast || !director) {
             res.status(400).json({ message: "Please provide all required fields" });
             return;
         }
         const type = contentType && ["MOVIE", "WEB_SERIES", "ANIME"].includes(contentType)
             ? contentType
             : "MOVIE";
-        // Prevent duplicate titles (SQLite-safe case-insensitive check)
+        // Prevent duplicate titles of the same content type only
+        // (allows e.g. "The Flash" Movie AND "The Flash" Web Series to coexist)
         const existingMovie = await db_1.default.movie.findFirst({
-            where: { title: { contains: title } }
+            where: {
+                title: { equals: title, mode: 'insensitive' },
+                contentType: type,
+            }
         });
         const isDuplicate = existingMovie &&
             existingMovie.title.toLowerCase() === title.toLowerCase();
         if (isDuplicate) {
-            res.status(409).json({ message: `"${title}" already exists in the database. Please choose a different title.` });
+            const typeLabel = type === "MOVIE" ? "Movie" : type === "WEB_SERIES" ? "Web Series" : "Anime";
+            res.status(409).json({ message: `"${title}" already exists as a ${typeLabel} in the database.` });
             return;
         }
         const movie = await db_1.default.movie.create({
@@ -142,8 +149,12 @@ const createMovie = async (req, res) => {
                 rating: parseFloat(rating),
                 thumbnailUrl, bannerUrl,
                 trailerUrl: trailerUrl || null,
-                videoUrl, cast, director,
+                teaserUrl: teaserUrl || null,
+                videoUrl,
+                cast,
+                director,
                 studio: studio || null,
+                franchise: franchise || null,
                 totalSeasons: totalSeasons ? parseInt(totalSeasons) : null,
                 totalEpisodes: totalEpisodes ? parseInt(totalEpisodes) : null,
                 status: status || null,
@@ -169,7 +180,7 @@ const updateMovie = async (req, res) => {
             res.status(404).json({ message: "Content not found" });
             return;
         }
-        const { title, description, genre, contentType, releaseYear, duration, language, rating, thumbnailUrl, bannerUrl, trailerUrl, videoUrl, cast, director, studio, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder, } = req.body;
+        const { title, description, genre, contentType, releaseYear, duration, language, rating, thumbnailUrl, bannerUrl, trailerUrl, teaserUrl, videoUrl, cast, director, studio, franchise, totalSeasons, totalEpisodes, status, featured, trending, showOnBanner, bannerOrder, } = req.body;
         const type = contentType && ["MOVIE", "WEB_SERIES", "ANIME"].includes(contentType)
             ? contentType
             : movie.contentType;
@@ -187,10 +198,12 @@ const updateMovie = async (req, res) => {
                 thumbnailUrl: thumbnailUrl ?? movie.thumbnailUrl,
                 bannerUrl: bannerUrl ?? movie.bannerUrl,
                 trailerUrl: trailerUrl !== undefined ? trailerUrl : movie.trailerUrl,
+                teaserUrl: teaserUrl !== undefined ? teaserUrl : movie.teaserUrl,
                 videoUrl: videoUrl ?? movie.videoUrl,
                 cast: cast ?? movie.cast,
                 director: director ?? movie.director,
                 studio: studio !== undefined ? studio : movie.studio,
+                franchise: franchise !== undefined ? franchise : movie.franchise,
                 totalSeasons: totalSeasons !== undefined ? (totalSeasons !== "" ? parseInt(totalSeasons) : null) : movie.totalSeasons,
                 totalEpisodes: totalEpisodes !== undefined ? (totalEpisodes !== "" ? parseInt(totalEpisodes) : null) : movie.totalEpisodes,
                 status: status !== undefined ? status : movie.status,
