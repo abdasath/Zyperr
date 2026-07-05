@@ -561,6 +561,7 @@ function BrowseContent() {
                             
                             {/* ── Explicit Allowed Collections for Movies Tab ── */}
                             {activeType === "MOVIE" && [
+                              "Home Alone Collection",
                               "Pirates of the Caribbean Collection",
                               "The Terminator Collection",
                               "Jurassic Collection",
