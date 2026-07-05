@@ -114,6 +114,7 @@ function NavbarInner() {
                   href={link.href}
                   id={`nav-${link.label.toLowerCase()}`}
                   className="relative flex items-center gap-1.5 text-sm font-medium transition-all"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
                   style={{
                     padding: "7px 14px",
                     borderRadius: 10,

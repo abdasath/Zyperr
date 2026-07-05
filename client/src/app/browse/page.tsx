@@ -139,6 +139,7 @@ function BrowseContent() {
     setSearchQuery("");
     setSearchInput("");
     setActiveViewAll("");
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleTypeChange = (type: ContentType) => {
@@ -147,11 +148,12 @@ function BrowseContent() {
     setSearchQuery("");
     setSearchInput("");
     setActiveViewAll("");
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const handleViewAll = (section: string) => {
     setActiveViewAll(section);
-    // Let URL sync effect handle it
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const clearAll = () => {
