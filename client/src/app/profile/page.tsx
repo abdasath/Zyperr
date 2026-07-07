@@ -3,34 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Shield, LogOut, ChevronRight, Bookmark, Settings, User, CreditCard } from "lucide-react";
+import { Mail, Shield, LogOut, User, CreditCard } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
-import { watchlistApi } from "@/lib/api";
 import Navbar from "@/components/Navbar";
-import MovieCard from "@/components/MovieCard";
 import SignOutModal from "@/components/SignOutModal";
 
-interface Movie {
-  id: string;
-  title: string;
-  description: string;
-  genre: string;
-  releaseYear: number;
-  duration: number;
-  rating: number;
-  thumbnailUrl: string;
-  bannerUrl: string;
-  featured: boolean;
-  trending: boolean;
-  cast: string;
-  director: string;
-}
+
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   useEffect(() => {
@@ -38,15 +20,6 @@ export default function ProfilePage() {
       router.replace("/login"); 
       return; 
     }
-    
-    watchlistApi.get()
-      .then((res) => {
-        setMovies(res.data || []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
   }, [isAuthenticated, router]);
 
   const handleLogout = () => {
@@ -137,86 +110,7 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Clean Divider */}
-        <div className="w-full h-px bg-white/10 profile-divider" style={{ marginTop: "56px", marginBottom: "64px" }}></div>
-
-        {/* --- WATCHLIST SECTION --- */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ marginBottom: "48px" }}
-        >
-          <div className="flex items-center justify-between" style={{ marginBottom: "32px" }}>
-            <h2 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
-              My Watchlist
-            </h2>
-            <button 
-              onClick={() => router.push("/watchlist")}
-              className="text-sm font-bold uppercase tracking-wider flex items-center gap-1 transition-colors hover:text-white"
-              style={{ color: "var(--zyperr-red)" }}
-            >
-              View All <ChevronRight size={16} />
-            </button>
-          </div>
-
-          {loading ? (
-             <div className="h-48 flex items-center justify-center">
-               <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-             </div>
-          ) : movies.length > 0 ? (
-            <div
-              style={{
-                overflowX: "auto",
-                overflowY: "visible",
-                paddingBottom: "8px",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-            >
-              <div
-                className="flex gap-5"
-                style={{
-                  paddingTop: "16px",
-                  paddingBottom: "16px",
-                  paddingLeft: "4px",
-                  paddingRight: "4px",
-                  overflowY: "visible",
-                  width: "max-content",
-                }}
-              >
-                {movies.slice(0, 10).map((movie) => (
-                  <div key={movie.id} style={{ flexShrink: 0, width: 160 }}>
-                    <MovieCard movie={movie} size="sm" hideWatchlistButton />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div 
-              className="flex flex-col items-center justify-center glass-card bg-black/40 border border-white/5 relative overflow-hidden"
-              style={{ padding: "80px 16px", borderRadius: "24px" }}
-            >
-              <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 60%)" }} />
-              <div 
-                className="bg-white/5 border border-white/10 flex items-center justify-center shadow-xl relative z-10"
-                style={{ width: "64px", height: "64px", borderRadius: "50%", marginBottom: "24px" }}
-              >
-                <Bookmark size={28} className="text-gray-400" />
-              </div>
-              <p className="text-gray-300 text-lg font-medium text-center relative z-10" style={{ marginBottom: "32px" }}>Your watchlist is currently empty.</p>
-              <button 
-                onClick={() => router.push("/browse")} 
-                className="text-sm font-bold uppercase tracking-wider text-white transition-all shadow-[0_8px_20px_rgba(229,9,20,0.3)] hover:shadow-[0_10px_25px_rgba(229,9,20,0.5)] hover:-translate-y-0.5 relative z-10"
-                style={{ background: "linear-gradient(135deg, var(--zyperr-red) 0%, #a00 100%)", padding: "14px 32px", borderRadius: "12px" }}
-              >
-                Discover Movies
-              </button>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Clean Divider */}
-        <div className="w-full h-px bg-white/10 profile-divider" style={{ marginTop: "48px", marginBottom: "48px" }}></div>
+        <div className="w-full h-px bg-white/10 profile-divider" style={{ marginTop: "56px", marginBottom: "56px" }}></div>
 
         {/* --- ACCOUNT DETAILS SECTION --- */}
         <motion.div
