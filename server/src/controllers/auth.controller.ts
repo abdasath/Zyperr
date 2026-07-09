@@ -52,6 +52,12 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    // ── Only allow Gmail addresses ────────────────────────────────
+    if (emailDomain !== "gmail.com") {
+      res.status(400).json({ message: "Only Gmail addresses (@gmail.com) are allowed to register." });
+      return;
+    }
+
     if (password.length < 6) {
       res.status(400).json({ message: "Password must be at least 6 characters" });
       return;

@@ -63,6 +63,11 @@ export default function RegisterPage() {
       return;
     }
 
+    // ── Gmail only ───────────────────────────────────────────────
+    if (emailDomain !== "gmail.com") {
+      setError("Only Gmail addresses (@gmail.com) are allowed to register.");
+      return;
+    }
 
     setIsLoading(true);
     try {
