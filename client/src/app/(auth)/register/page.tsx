@@ -65,7 +65,7 @@ export default function RegisterPage() {
 
     // ── Gmail only ───────────────────────────────────────────────
     if (emailDomain !== "gmail.com") {
-      setError("Only Gmail addresses (@gmail.com) are allowed to register.");
+      setError("Please enter a valid email address.");
       return;
     }
 

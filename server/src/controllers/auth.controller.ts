@@ -54,7 +54,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
     // ── Only allow Gmail addresses ────────────────────────────────
     if (emailDomain !== "gmail.com") {
-      res.status(400).json({ message: "Only Gmail addresses (@gmail.com) are allowed to register." });
+      res.status(400).json({ message: "Please enter a valid email address." });
       return;
     }
 
