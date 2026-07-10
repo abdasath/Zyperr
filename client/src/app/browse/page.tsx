@@ -493,7 +493,7 @@ function BrowseContent() {
       {/* ══════════════════════════════════════════════════
           MAIN CONTENT
       ══════════════════════════════════════════════════ */}
-      <div className="browse-container" style={{ flex: 1, width: "100%", maxWidth: 1400, margin: "0 auto", paddingBottom: "20px", paddingTop: "24px" }}>
+      <div className="browse-container" style={{ flex: 1, width: "100%", maxWidth: 1400, margin: "0 auto", paddingBottom: "20px", paddingTop: searchQuery || activeGenre ? "120px" : "24px" }}>
         {loading ? (
           <SkeletonLoader />
         ) : isFiltered || isCategoryPage ? (
