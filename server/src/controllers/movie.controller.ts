@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../config/db";
 
-// GET /api/movies - list all content (public, paginated)
-// Uses raw SQL ILIKE for guaranteed case-insensitive search on PostgreSQL/Neon
 export const getMovies = async (req: Request, res: Response): Promise<void> => {
   try {
     const page  = parseInt(req.query.page  as string) || 1;
@@ -31,7 +29,6 @@ export const getMovies = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// GET /api/movies/featured
 export const getFeatured = async (_req: Request, res: Response): Promise<void> => {
   try {
     const movies = await prisma.movie.findMany({
@@ -45,7 +42,6 @@ export const getFeatured = async (_req: Request, res: Response): Promise<void> =
   }
 };
 
-// GET /api/movies/banner
 export const getBanner = async (_req: Request, res: Response): Promise<void> => {
   try {
     const movies = await prisma.movie.findMany({
@@ -59,7 +55,6 @@ export const getBanner = async (_req: Request, res: Response): Promise<void> => 
   }
 };
 
-// GET /api/movies/trending
 export const getTrending = async (_req: Request, res: Response): Promise<void> => {
   try {
     const movies = await prisma.movie.findMany({
@@ -73,7 +68,6 @@ export const getTrending = async (_req: Request, res: Response): Promise<void> =
   }
 };
 
-// GET /api/movies/genres - list unique genres
 export const getGenres = async (_req: Request, res: Response): Promise<void> => {
   try {
     const movies = await prisma.movie.findMany({ select: { genre: true } });
@@ -88,7 +82,6 @@ export const getGenres = async (_req: Request, res: Response): Promise<void> => 
   }
 };
 
-// GET /api/movies/:id
 export const getMovieById = async (req: Request, res: Response): Promise<void> => {
   try {
     const movie = await prisma.movie.findUnique({ where: { id: String(req.params.id) } });
@@ -103,7 +96,6 @@ export const getMovieById = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// POST /api/movies — admin only
 export const createMovie = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -122,8 +114,6 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
       ? contentType
       : "MOVIE";
 
-    // Prevent duplicate titles of the same content type only
-    // (allows e.g. "The Flash" Movie AND "The Flash" Web Series to coexist)
     const existingMovie = await prisma.movie.findFirst({
       where: {
         title: { equals: title, mode: 'insensitive' },
@@ -173,7 +163,6 @@ export const createMovie = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// PUT /api/movies/:id — admin only
 export const updateMovie = async (req: Request, res: Response): Promise<void> => {
   try {
     const movie = await prisma.movie.findUnique({ where: { id: String(req.params.id) } });
@@ -229,7 +218,6 @@ export const updateMovie = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// DELETE /api/movies/:id — admin only
 export const deleteMovie = async (req: Request, res: Response): Promise<void> => {
   try {
     const movie = await prisma.movie.findUnique({ where: { id: String(req.params.id) } });

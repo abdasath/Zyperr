@@ -14,7 +14,6 @@ import { protect, adminOnly } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-// Public routes
 router.get("/", getMovies);
 router.get("/featured", getFeatured);
 router.get("/banner", getBanner);
@@ -22,7 +21,6 @@ router.get("/trending", getTrending);
 router.get("/genres", getGenres);
 router.get("/:id", getMovieById);
 
-// Admin-only routes
 router.post("/", protect, adminOnly, createMovie);
 router.put("/:id", protect, adminOnly, updateMovie);
 router.delete("/:id", protect, adminOnly, deleteMovie);

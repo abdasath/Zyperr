@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../config/db";
 
-// GET /api/watchlist — user's watchlist
 export const getWatchlist = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -16,7 +15,6 @@ export const getWatchlist = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// POST /api/watchlist — add to watchlist
 export const addToWatchlist = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -43,7 +41,6 @@ export const addToWatchlist = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// DELETE /api/watchlist/:movieId — remove from watchlist
 export const removeFromWatchlist = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -56,7 +53,6 @@ export const removeFromWatchlist = async (req: Request, res: Response): Promise<
   }
 };
 
-// GET /api/watchlist/check/:movieId — check if in watchlist
 export const checkWatchlist = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;

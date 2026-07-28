@@ -12,7 +12,6 @@ const generateToken = (id: string, role: string) => {
   });
 };
 
-// ─── REGISTER — instantly creates account and logs in ───────────
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, name } = req.body;
@@ -22,14 +21,12 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // ── Email format validation ──────────────────────────────────
     const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       res.status(400).json({ message: "Please enter a valid email address" });
       return;
     }
 
-    // ── Block domains with no valid TLD (e.g. newton@aedgf) ──────
     const emailDomain = email.split("@")[1]?.toLowerCase();
     const domainParts = emailDomain?.split(".");
     if (!domainParts || domainParts.length < 2 || domainParts[domainParts.length - 1].length < 2) {
@@ -37,7 +34,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // ── Block known disposable/fake email domains ─────────────────
     const blockedDomains = [
       "mailinator.com", "guerrillamail.com", "temp-mail.org", "throwam.com",
       "yopmail.com", "trashmail.com", "sharklasers.com", "grr.la",
@@ -52,7 +48,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // ── Only allow Gmail addresses ────────────────────────────────
     if (emailDomain !== "gmail.com") {
       res.status(400).json({ message: "Please enter a valid email address." });
       return;
@@ -89,9 +84,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
   }
 };
 
-// OTP functions removed
-
-// ─── LOGIN — allows all accounts ──────────────────────────
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -130,7 +122,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// ─── GOOGLE LOGIN (auto-verified) ────────────────────────────────
 export const googleLogin = async (req: Request, res: Response): Promise<void> => {
   try {
     const { token, intent } = req.body;
@@ -173,7 +164,6 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
         return;
       }
       if (!user.isVerified) {
-        // Auto-verify Google users
         user = await prisma.user.update({ where: { email }, data: { isVerified: true } });
       }
     }
@@ -192,7 +182,6 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// ─── GET ME ───────────────────────────────────────────────────────
 export const getMe = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await prisma.user.findUnique({

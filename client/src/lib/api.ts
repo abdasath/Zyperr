@@ -10,10 +10,8 @@ const api = axios.create({
   },
 });
 
-// Request interceptor — attach JWT token
 api.interceptors.request.use(
   (config) => {
-    // Get token from zustand persisted storage
     try {
       const authStorage = localStorage.getItem("auth-storage");
       if (authStorage) {
@@ -31,16 +29,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — handle 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth state on unauthorized
       try {
         useAuthStore.getState().logout();
       } catch {
-        // ignore if outside react context
+        // ignore
       }
     }
     return Promise.reject(error);
@@ -48,10 +44,6 @@ api.interceptors.response.use(
 );
 
 export default api;
-
-// ============================================
-// API HELPERS
-// ============================================
 
 export const moviesApi = {
   getAll: (params?: Record<string, any>) => api.get("/movies", { params }),
